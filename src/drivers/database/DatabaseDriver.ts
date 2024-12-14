@@ -104,6 +104,7 @@ class PostgresDriver implements DatabaseDriver {
 }
 
 export default async function getDatabaseDriver() {
+  // TODO: more DBs (move to knex?)
   const dbType = await select({
     message: "What database would you like to use?",
     choices: [

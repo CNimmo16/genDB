@@ -63,6 +63,7 @@ async function generateResponse<T extends ZodType>(
 }
 
 async function generateDb() {
+  // TODO: separate prompts from API layer - support non-cli use
   console.log(chalk.blue("Welcome to Generative DB!"));
   console.log("");
 
@@ -205,6 +206,8 @@ async function generateDb() {
     );
   });
   console.log(" ");
+
+  // TODO: add table editor prompts (select from list of table names to edit or add new one, then select from list of column names to edit or add new one)
 
   const proceed = await confirm({
     message:
@@ -417,6 +420,8 @@ async function generateDb() {
 
     await db.disconnect();
   } catch (e) {
+    // TODO: drop already created tables if crashes halfway through (transaction?)
+    // TODO: Save data model to a temporary file if crashes, add check for temporary file and option to restore when starting cli
     console.log(
       chalk.red(`Error creating database tables. Rejecting with error.`),
     );
