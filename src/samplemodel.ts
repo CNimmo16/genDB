@@ -6,31 +6,31 @@ export default {
         {
           name: "UserID",
           isPrimaryKey: true,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "Username",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "Email",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "PasswordHash",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "UserType",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
       ],
@@ -41,25 +41,25 @@ export default {
         {
           name: "ProviderID",
           isPrimaryKey: true,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "ProviderName",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "ContactEmail",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "ContactNumber",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
       ],
@@ -70,13 +70,13 @@ export default {
         {
           name: "LoanID",
           isPrimaryKey: true,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "ProviderID",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: {
             referencedTable: "CreditProviders",
             referencedColumn: "ProviderID",
@@ -85,25 +85,25 @@ export default {
         {
           name: "LoanType",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "InterestRate",
           isPrimaryKey: false,
-          type: "number",
+          type: "integer",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "AmountRange",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "TermRange",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
       ],
@@ -114,19 +114,19 @@ export default {
         {
           name: "ApplicationID",
           isPrimaryKey: true,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "UserID",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "Users", referencedColumn: "UserID" },
         },
         {
           name: "LoanID",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: {
             referencedTable: "LoanProducts",
             referencedColumn: "LoanID",
@@ -135,7 +135,7 @@ export default {
         {
           name: "Status",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
@@ -152,13 +152,13 @@ export default {
         {
           name: "ReviewID",
           isPrimaryKey: true,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "ApplicationID",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: {
             referencedTable: "Applications",
             referencedColumn: "ApplicationID",
@@ -167,7 +167,7 @@ export default {
         {
           name: "ReviewerUserID",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "Users", referencedColumn: "UserID" },
         },
         {
@@ -179,7 +179,7 @@ export default {
         {
           name: "Comments",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
       ],
@@ -190,13 +190,13 @@ export default {
         {
           name: "QueryID",
           isPrimaryKey: true,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "ApplicationID",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: {
             referencedTable: "Applications",
             referencedColumn: "ApplicationID",
@@ -211,13 +211,13 @@ export default {
         {
           name: "QueryText",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "ResponseText",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
@@ -234,25 +234,25 @@ export default {
         {
           name: "UserID",
           isPrimaryKey: true,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "Users", referencedColumn: "UserID" },
         },
         {
           name: "FullName",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "Address",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "PhoneNumber",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
@@ -269,13 +269,13 @@ export default {
         {
           name: "DocumentID",
           isPrimaryKey: true,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "ApplicationID",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: {
             referencedTable: "Applications",
             referencedColumn: "ApplicationID",
@@ -284,13 +284,13 @@ export default {
         {
           name: "FileName",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "FileURL",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
@@ -307,19 +307,19 @@ export default {
         {
           name: "NotificationID",
           isPrimaryKey: true,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "UserID",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "Users", referencedColumn: "UserID" },
         },
         {
           name: "Message",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
@@ -342,13 +342,13 @@ export default {
         {
           name: "ReviewID",
           isPrimaryKey: true,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "ProviderID",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: {
             referencedTable: "CreditProviders",
             referencedColumn: "ProviderID",
@@ -357,19 +357,19 @@ export default {
         {
           name: "UserID",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "Users", referencedColumn: "UserID" },
         },
         {
           name: "Rating",
           isPrimaryKey: false,
-          type: "number",
+          type: "integer",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
           name: "Comments",
           isPrimaryKey: false,
-          type: "string",
+          type: "text",
           foreignKey: { referencedTable: "", referencedColumn: "" },
         },
         {
