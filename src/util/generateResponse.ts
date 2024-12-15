@@ -2,11 +2,12 @@ import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { z, ZodType } from "zod";
-import actionWithLoading from "./actionWithLoading.js";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+const DEFAULT_MAX_TOKENS = 1000;
 
 export default async function generateResponse<T extends ZodType>(
   messages: ChatCompletionMessageParam[],
@@ -20,8 +21,10 @@ export default async function generateResponse<T extends ZodType>(
   },
 ): Promise<{
   response: z.infer<T>;
+  tokensUsed: number;
 }> {
   const {
+    usage,
     choices: [
       {
         message: { parsed },
@@ -33,12 +36,13 @@ export default async function generateResponse<T extends ZodType>(
       validator,
       `${dataDesc}_response_format`,
     ),
+    max_completion_tokens: DEFAULT_MAX_TOKENS,
     ...options,
   });
 
-  if (!parsed) {
+  if (!parsed || !usage) {
     throw new Error("Failed to generate response");
   }
 
-  return { response: parsed };
+  return { response: parsed, tokensUsed: usage.total_tokens };
 }

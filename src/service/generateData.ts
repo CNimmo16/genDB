@@ -16,32 +16,40 @@ export async function generateData(
   businessSummary: string,
   tables: Table[],
   log: (message: string) => void,
-): Promise<RowsByTable> {
+): Promise<{
+  rowsByTable: RowsByTable;
+  tokensUsed: number;
+}> {
   const sourceTables = tables.filter((table) =>
     table.columns.every((col) => !col.foreignKey),
   );
 
-  const rowsByTable = await generateDataForTable(
+  const { rowsByTable, totalTokensUsed } = await generateDataForTable(
     businessSummary,
     tables,
     sourceTables[0],
     {},
     log,
+    0,
   );
 
-  return rowsByTable;
+  return {
+    rowsByTable,
+    tokensUsed: totalTokensUsed,
+  };
 }
 
 async function generateDataForTable(
   businessSummary: string,
   tables: Table[],
   table: Table,
-  _rowsByTable: {
+  rowsByTable: {
     [tableName: string]: {
       [columnName: string]: string;
     }[];
   },
   log: (message: string) => void,
+  totalTokensUsed: number,
 ) {
   const ROW_COUNT_PER_REFERENCED_VALUE = 2;
 
@@ -55,7 +63,7 @@ async function generateDataForTable(
           const referencedTable = tables.find(
             (t) => t.name === foreignKeyColumn.foreignKey!.referencedTable,
           )!;
-          const allRowsFromReferencedTable = _rowsByTable[referencedTable.name];
+          const allRowsFromReferencedTable = rowsByTable[referencedTable.name];
           const actualColumnName = Object.keys(
             allRowsFromReferencedTable[0],
           ).find(
@@ -160,7 +168,7 @@ async function generateDataForTable(
       } else {
         let values: string[] = [];
         while (values.length < rowCount) {
-          const { response } = await generateResponse(
+          const { response, tokensUsed } = await generateResponse(
             [
               {
                 role: "system",
@@ -176,6 +184,7 @@ async function generateDataForTable(
             }),
             "row_data",
           );
+          totalTokensUsed += tokensUsed;
           values.push(...response.values);
         }
         return values.slice(0, rowCount);
@@ -185,7 +194,7 @@ async function generateDataForTable(
 
   const rowsWithNonForeignKeyData = transposeArray(nonForeignKeyColumnValues);
 
-  _rowsByTable[table.name] = rowsWithForeignKeyColumnData.map(
+  rowsByTable[table.name] = rowsWithForeignKeyColumnData.map(
     (rowWithForeignKeyData, i) => {
       return Object.fromEntries(
         Object.entries(rowWithForeignKeyData).map(([columnName, value]) => {
@@ -205,24 +214,27 @@ async function generateDataForTable(
   );
   log(
     chalk.blue(
-      `Generated ${_rowsByTable[table.name].length} rows for table ${table.name}`,
+      `Generated ${rowsByTable[table.name].length} rows for table ${table.name}`,
     ),
   );
 
-  const visitedTables = Object.keys(_rowsByTable).length;
+  const visitedTables = Object.keys(rowsByTable).length;
   if (visitedTables === tables.length) {
     // once all tables visited return from recursive loop
-    return _rowsByTable;
+    return {
+      rowsByTable,
+      totalTokensUsed,
+    };
   }
 
   // otherwise find the next table which can be safely created
   const firstTableWithAllReferencedTablesPopulated = tables.find((table) => {
     return (
-      !_rowsByTable[table.name] &&
+      !rowsByTable[table.name] &&
       table.columns.every((col) => {
         return (
           !col.foreignKey ||
-          Boolean(_rowsByTable[col.foreignKey!.referencedTable])
+          Boolean(rowsByTable[col.foreignKey!.referencedTable])
         );
       })
     );
@@ -236,7 +248,8 @@ async function generateDataForTable(
     businessSummary,
     tables,
     firstTableWithAllReferencedTablesPopulated,
-    _rowsByTable,
+    rowsByTable,
     log,
+    totalTokensUsed,
   );
 }

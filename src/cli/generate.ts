@@ -2,7 +2,11 @@ import { confirm, input, number, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import { z } from "zod";
 import actionWithLoading from "../util/actionWithLoading.js";
-import { generateDataModel, Table } from "../service/generateDataModel.js";
+import {
+  estimateRequiredTokensForDataModel,
+  generateDataModel,
+  Table,
+} from "../service/generateDataModel.js";
 import { generateData } from "../service/generateData.js";
 import generateResponse from "../util/generateResponse.js";
 import { applyToDb } from "../service/applyToDb.js";
@@ -29,6 +33,8 @@ async function runCli(maybeInputs: {
 }) {
   console.log(chalk.blue("Welcome to Generative DB!"));
   console.log("");
+
+  let totalTokensUsed = 0;
 
   const backup = await (async () => {
     if (!existsSync(backupFolder)) {
@@ -115,6 +121,7 @@ async function runCli(maybeInputs: {
     if (businessSummary) {
       const {
         response: { names: nameSuggestions },
+        tokensUsed: tokensUsedForNameSuggestions,
       } = await actionWithLoading("Generating name suggestions", () =>
         generateResponse(
           [
@@ -128,6 +135,11 @@ async function runCli(maybeInputs: {
           }),
           "name",
         ),
+      );
+
+      totalTokensUsed = handleTokensUsed(
+        tokensUsedForNameSuggestions,
+        totalTokensUsed,
       );
 
       companyName = await select({
@@ -151,21 +163,27 @@ async function runCli(maybeInputs: {
         });
       }
     } else {
-      const { response } = await actionWithLoading("Generating company", () =>
-        generateResponse(
-          [
-            {
-              role: "user",
-              content: `Generate a business idea for a tech startup. Summarise the business business model in a few sentences. Also generate a suitable name for the company.`,
-            },
-          ],
-          z.object({
-            businessSummary: z.string(),
-            companyName: z.string(),
-          }),
-          "summary_with_name",
-        ),
+      const { response, tokensUsed: tokensUsedForCompanyName } =
+        await actionWithLoading("Generating company", () =>
+          generateResponse(
+            [
+              {
+                role: "user",
+                content: `Generate a business idea for a tech startup. Summarise the business business model in a few sentences. Also generate a suitable name for the company.`,
+              },
+            ],
+            z.object({
+              businessSummary: z.string(),
+              companyName: z.string(),
+            }),
+            "summary_with_name",
+          ),
+        );
+      totalTokensUsed = handleTokensUsed(
+        tokensUsedForCompanyName,
+        totalTokensUsed,
       );
+
       businessSummary = response.businessSummary;
       companyName = response.companyName;
 
@@ -179,42 +197,67 @@ async function runCli(maybeInputs: {
     }
   }
 
-  const tableCount = await (async function getTableCount() {
-    const ESTIMATED_TOKENS_PER_TABLE = 300;
-
-    const count = (await number({
-      message: `What is the maximum number of tables we should allow the model to generate? (the model will use approximately ${ESTIMATED_TOKENS_PER_TABLE} chatgpt completion tokens per table)`,
-      default: 10,
-      required: true,
-    }))!;
-
-    const tokenLimit = count * ESTIMATED_TOKENS_PER_TABLE;
-
-    const tokenConfirm = await confirm({
-      message: `We will set a max limit of ${tokenLimit} tokens. Continue?`,
-    });
-
-    if (!tokenConfirm) {
-      return getTableCount();
+  const { tables, modelGeneratedAt } = await (async function generateModel() {
+    const getFormattedDateForBackup = (date: Date) =>
+      date.toISOString().substring(0, 19).replace("T", "_").replaceAll(":", "");
+    if (backup) {
+      return {
+        tables: backup.contents.tables,
+        modelGeneratedAt: getFormattedDateForBackup(backup.date),
+      };
     }
-    return count;
+
+    const { tableCount, tokenLimit } = await (async function getTableCount() {
+      const count = (await number({
+        message: `What is the maximum number of tables we should allow the model to generate?`,
+        default: 10,
+        required: true,
+        min: 3,
+        max: 20,
+      }))!;
+
+      const { estimatedTokens } = estimateRequiredTokensForDataModel({
+        businessSummary,
+        companyName,
+        tableCount: count,
+      });
+
+      const tokenConfirm = await confirm({
+        message: `We will set a max limit of ${estimatedTokens} tokens for data model generation (more tokens will be required later for sample data generation). Continue?`,
+      });
+
+      if (!tokenConfirm) {
+        return getTableCount();
+      }
+      return {
+        tableCount: count,
+        tokenLimit: estimatedTokens,
+      };
+    })();
+
+    const { tables: _tables, tokensUsed: tokensUsedToGenerateModel } =
+      await actionWithLoading("Generating data model", () =>
+        generateDataModel({
+          businessSummary,
+          companyName,
+          tableCount,
+          tokenLimit,
+        }),
+      );
+
+    console.log(" ");
+    console.log(chalk.green("We've generated a data model for you!"));
+    totalTokensUsed = handleTokensUsed(
+      tokensUsedToGenerateModel,
+      totalTokensUsed,
+    );
+
+    return {
+      tables: _tables,
+      modelGeneratedAt: getFormattedDateForBackup(new Date()),
+    };
   })();
 
-  const tables = backup
-    ? backup.contents.tables
-    : await actionWithLoading("Generating data model", () =>
-        generateDataModel({ businessSummary, companyName, tableCount }),
-      ).then((res) => res.tables);
-  const modelGeneratedAt = new Date()
-    .toISOString()
-    .substring(0, 19)
-    .replace("T", "_")
-    .replaceAll(":", "");
-
-  console.log(" ");
-  if (!backup) {
-    console.log(chalk.green("We've generated a data model for you!"));
-  }
   console.log(" ");
   console.log(
     `${chalk.blue(`Tables with columns`)} (including ${chalk.green("primary keys")} and ${chalk.yellow("foreign keys")})`,
@@ -236,6 +279,34 @@ async function runCli(maybeInputs: {
   });
   console.log(" ");
 
+  // check data model is valid
+  tables.forEach((table) =>
+    table.columns.forEach((col) => {
+      if (col.foreignKey) {
+        const referencedTable = tables.find(
+          (t) => t.name === col.foreignKey!.referencedTable,
+        );
+        if (!referencedTable) {
+          console.log(
+            `${chalk.red("DATA MODEL INVALID:")} Could not find referenced table ${col.foreignKey!.referencedTable} for column ${col.name} in table ${table.name}`,
+          );
+          // TODO: handle more gracefully
+          process.exit(0);
+        }
+        const referencedColumn = referencedTable.columns.find(
+          (c) => c.name === col.foreignKey!.referencedColumn,
+        );
+        if (!referencedColumn) {
+          console.log(
+            `${chalk.red("DATA MODEL INVALID:")} Could not find referenced column ${col.foreignKey!.referencedTable}.${col.foreignKey!.referencedColumn} for column ${col.name} in table ${table.name}`,
+          );
+          // TODO: handle more gracefully
+          process.exit(0);
+        }
+      }
+    }),
+  );
+
   const proceed = await confirm({
     message:
       "Would you like to continue? We will now generate some data for your database.",
@@ -250,10 +321,17 @@ async function runCli(maybeInputs: {
 
   // TODO: proper typing
   let rowsByTableToSave: any;
+  let save = false;
   try {
-    const rowsByTable = await actionWithLoading("Generating data...", () =>
-      generateData(businessSummary, tables, console.log),
+    const { rowsByTable, tokensUsed: tokensUsedToGenerateData } =
+      await actionWithLoading("Generating data...", () =>
+        generateData(businessSummary, tables, console.log),
+      );
+    totalTokensUsed = handleTokensUsed(
+      tokensUsedToGenerateData,
+      totalTokensUsed,
     );
+
     rowsByTableToSave = rowsByTable;
 
     console.log(chalk.green(`Data generated successfully!`));
@@ -279,6 +357,8 @@ async function runCli(maybeInputs: {
       await applyToDb(dbConfig, tables, rowsByTable, console.log);
 
       console.log(chalk.green("Data inserted successfully!"));
+    } else {
+      save = true;
     }
   } catch (err) {
     console.error(err);
@@ -328,20 +408,27 @@ async function runCli(maybeInputs: {
     }
   }
 
-  const save = await select({
-    message:
-      "Would you like to save your company name, business summary and data model as JSON to a file?",
-    choices: [
-      {
-        name: "Yes",
-        value: true,
-      },
-      {
-        name: "No",
-        value: false,
-      },
-    ],
-  });
+  console.log(
+    chalk.magenta(`Total tokens used: ${chalk.bold(totalTokensUsed)}`),
+  );
+  console.log(" ");
+
+  if (!save) {
+    save = await select({
+      message:
+        "Would you like to save your company name, business summary and data model as JSON to a file?",
+      choices: [
+        {
+          name: "Yes",
+          value: true,
+        },
+        {
+          name: "No",
+          value: false,
+        },
+      ],
+    });
+  }
 
   if (save) {
     const fileName = await input({
@@ -398,3 +485,14 @@ runCli(parsedArgs).catch((err) => {
     throw err;
   }
 });
+
+function handleTokensUsed(tokensUsedInStep: number, totalTokensUsed: number) {
+  totalTokensUsed += tokensUsedInStep;
+  console.log(
+    chalk.magenta(
+      `(Used ${chalk.bold(tokensUsedInStep)} tokens. Total tokens used so far: ${chalk.bold(totalTokensUsed)})`,
+    ),
+  );
+  console.log(" ");
+  return totalTokensUsed;
+}

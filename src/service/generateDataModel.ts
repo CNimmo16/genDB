@@ -14,18 +14,41 @@ type GenerateDataModelInputs = {
   businessSummary: string;
   companyName: string;
   tableCount: number;
+  tokenLimit: number;
 };
+
+export function estimateRequiredTokensForDataModel({
+  businessSummary,
+  companyName,
+  tableCount,
+}: Omit<GenerateDataModelInputs, "tokenLimit">) {
+  const prompt = `imagine a data model for a company called ${companyName} with the following business model:\n${businessSummary}\nReturn a list of tables and columns for the company's database, including foreign keys. Generate a maximum of ${tableCount} tables. Do not generate foreign keys pointing to columns that do not exist.`;
+
+  const ESTIMATED_TOKENS_PER_TABLE = 300;
+
+  return {
+    prompt,
+    estimatedTokens: ESTIMATED_TOKENS_PER_TABLE * tableCount + prompt.length,
+  };
+}
 
 export async function generateDataModel({
   businessSummary,
   companyName,
   tableCount,
+  tokenLimit,
 }: GenerateDataModelInputs) {
-  const { response: dataModel } = await generateResponse(
+  const { prompt } = estimateRequiredTokensForDataModel({
+    businessSummary,
+    companyName,
+    tableCount,
+  });
+  const maxCompletionTokens = tokenLimit - prompt.length;
+  const { response: dataModel, tokensUsed } = await generateResponse(
     [
       {
         role: "user",
-        content: `imagine a data model for a company called ${companyName} with the following business model:\n${businessSummary}\nReturn a list of tables and columns for the company's database, including foreign keys. Aim for around ${tableCount} tables.`,
+        content: `imagine a data model for a company called ${companyName} with the following business model:\n${businessSummary}\nReturn a list of tables and columns for the company's database, including foreign keys. Generate a maximum of ${tableCount} tables.`,
       },
     ],
     z.object({
@@ -49,7 +72,7 @@ export async function generateDataModel({
     "data_model",
     {
       model: "gpt-4o",
-      max_completion_tokens: 6000,
+      max_completion_tokens: maxCompletionTokens,
     },
   );
 
@@ -63,6 +86,7 @@ export async function generateDataModel({
 
   return {
     tables,
+    tokensUsed,
   };
 }
 
