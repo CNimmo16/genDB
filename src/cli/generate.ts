@@ -346,8 +346,9 @@ export default async function generate(args: minimist.ParsedArgs) {
       process.exit(0);
     }
 
-    // TODO: proper typing
-    let rowsByTableToSave: any;
+    let rowsByTableToSave: Awaited<
+      ReturnType<typeof generateData>
+    >["rowsByTable"];
     let save = false;
     try {
       const { rowsByTable, tokensUsed: tokensUsedToGenerateData } =

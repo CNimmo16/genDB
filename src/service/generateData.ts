@@ -96,7 +96,7 @@ async function generateDataForTable(
     const usedForeignKeyColumnValuesMapping: {
       [columnName: string]: string[];
     } = Object.fromEntries(
-      foreignKeyColumnValuesMappingEntries.map(([key, values]) => [key, []]),
+      foreignKeyColumnValuesMappingEntries.map(([key]) => [key, []]),
     );
 
     while (Object.values(foreignKeyColumnValuesMapping).flat().length > 0) {
@@ -166,7 +166,7 @@ async function generateDataForTable(
       } else if (column.type === DataType.UUID) {
         return [...new Array(rowCount)].map(() => v4());
       } else {
-        let values: string[] = [];
+        const values: string[] = [];
         while (values.length < rowCount) {
           const { response, tokensUsed } = await generateResponse(
             [
@@ -228,10 +228,10 @@ async function generateDataForTable(
   }
 
   // otherwise find the next table which can be safely created
-  const firstTableWithAllReferencedTablesPopulated = tables.find((table) => {
+  const firstTableWithAllReferencedTablesPopulated = tables.find((_table) => {
     return (
-      !rowsByTable[table.name] &&
-      table.columns.every((col) => {
+      !rowsByTable[_table.name] &&
+      _table.columns.every((col) => {
         return (
           !col.foreignKey ||
           Boolean(rowsByTable[col.foreignKey!.referencedTable])
