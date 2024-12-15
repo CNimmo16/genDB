@@ -1,4 +1,4 @@
-import { confirm, input, select } from "@inquirer/prompts";
+import { confirm, input, number, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import { z } from "zod";
 import actionWithLoading from "../util/actionWithLoading.js";
@@ -179,10 +179,31 @@ async function runCli(maybeInputs: {
     }
   }
 
+  const tableCount = await (async function getTableCount() {
+    const ESTIMATED_TOKENS_PER_TABLE = 300;
+
+    const count = (await number({
+      message: `What is the maximum number of tables we should allow the model to generate? (the model will use approximately ${ESTIMATED_TOKENS_PER_TABLE} chatgpt completion tokens per table)`,
+      default: 10,
+      required: true,
+    }))!;
+
+    const tokenLimit = count * ESTIMATED_TOKENS_PER_TABLE;
+
+    const tokenConfirm = await confirm({
+      message: `We will set a max limit of ${tokenLimit} tokens. Continue?`,
+    });
+
+    if (!tokenConfirm) {
+      return getTableCount();
+    }
+    return count;
+  })();
+
   const tables = backup
     ? backup.contents.tables
     : await actionWithLoading("Generating data model", () =>
-        generateDataModel({ businessSummary, companyName }),
+        generateDataModel({ businessSummary, companyName, tableCount }),
       ).then((res) => res.tables);
   const modelGeneratedAt = new Date()
     .toISOString()

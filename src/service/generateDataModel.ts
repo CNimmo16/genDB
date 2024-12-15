@@ -13,17 +13,19 @@ export enum DataType {
 type GenerateDataModelInputs = {
   businessSummary: string;
   companyName: string;
+  tableCount: number;
 };
 
 export async function generateDataModel({
   businessSummary,
   companyName,
+  tableCount,
 }: GenerateDataModelInputs) {
   const { response: dataModel } = await generateResponse(
     [
       {
         role: "user",
-        content: `imagine a data model for a company called ${companyName} with the following business model:\n${businessSummary}\nReturn a list of tables and columns for the company's database, including foreign keys. Aim for around 10 tables.`,
+        content: `imagine a data model for a company called ${companyName} with the following business model:\n${businessSummary}\nReturn a list of tables and columns for the company's database, including foreign keys. Aim for around ${tableCount} tables.`,
       },
     ],
     z.object({
