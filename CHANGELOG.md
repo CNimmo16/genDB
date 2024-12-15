@@ -1,5 +1,11 @@
 # generative-db
 
+## 0.2.0
+
+### Minor Changes
+
+- e62cc18: Add --key argument to "generate" command to allow passing OpenAI api key directly
+
 ## 0.1.2
 
 ### Patch Changes
