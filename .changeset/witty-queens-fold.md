@@ -1,0 +1,5 @@
+---
+"gendb": minor
+---
+
+initial release
