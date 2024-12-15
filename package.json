@@ -24,8 +24,8 @@
   "author": "CNimmo16",
   "license": "MIT",
   "bin": {
-    "generate": "dist/cli/generate.js",
-    "apply": "dist/cli/apply.js"
+    "generate": "./dist/cli/generate.js",
+    "apply": "./dist/cli/apply.js"
   },
   "scripts": {
     "format": "prettier --write .",
