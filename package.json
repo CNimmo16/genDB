@@ -24,15 +24,13 @@
   "author": "CNimmo16",
   "license": "MIT",
   "bin": {
-    "generate": "./dist/cli/generate.js",
-    "apply": "./dist/cli/apply.js"
+    "gendb": "./dist/bin.js"
   },
   "scripts": {
     "format": "prettier --write .",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "generate": "dotenvx run -f .env.local -- node dist/cli/generate.js",
-    "apply": "dotenvx run -f .env.local -- node dist/cli/apply.js",
+    "gendb:dev": "dotenvx run -f .env.local -- node dist/bin.js",
     "changeset": "tsc && changeset",
     "ci:release": "tsc && changeset version && changeset publish"
   },

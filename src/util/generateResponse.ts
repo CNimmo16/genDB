@@ -3,10 +3,6 @@ import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { z, ZodType } from "zod";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 const DEFAULT_MAX_TOKENS = 1000;
 
 export default async function generateResponse<T extends ZodType>(
@@ -14,7 +10,7 @@ export default async function generateResponse<T extends ZodType>(
   validator: T,
   dataDesc: string,
   options: Omit<
-    Parameters<typeof openai.beta.chat.completions.parse>[0],
+    Parameters<OpenAI["beta"]["chat"]["completions"]["parse"]>[0],
     "messages"
   > = {
     model: "gpt-4o-mini",
@@ -23,6 +19,10 @@ export default async function generateResponse<T extends ZodType>(
   response: z.infer<T>;
   tokensUsed: number;
 }> {
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
   const {
     usage,
     choices: [

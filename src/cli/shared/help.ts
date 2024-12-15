@@ -5,9 +5,15 @@ export function help() {
   console.log(" ");
   console.log(chalk.blue("Usage:"));
   console.log(
-    `- generate [--businessSummary <string>] [--companyName <string>] [--help]`,
+    `- gendb generate [--businessSummary <string>] [--companyName <string>] [--help]`,
   );
-  console.log(`- apply <filePath> [--help]`);
+  console.log(`- gendb apply <filePath> [--help]`);
+  console.log(" ");
+  console.log(
+    chalk.yellow(
+      `Please note: you should set the OPENAI_API_KEY environment variable before running the generate command eg. ${chalk.bgGray.white("OPENAI_API_KEY=mykey npx gendb generate")}`,
+    ),
+  );
   console.log(" ");
   process.exit(0);
 }
