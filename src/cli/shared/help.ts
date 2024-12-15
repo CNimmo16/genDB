@@ -5,15 +5,14 @@ export function help() {
   console.log(" ");
   console.log(chalk.blue("Usage:"));
   console.log(
-    `- gendb generate [--businessSummary <string>] [--companyName <string>] [--help]`,
+    `- gendb generate [--key <string>] [--businessSummary <string>] [--companyName <string>] [--help]`,
   );
-  console.log(`- gendb apply <filePath> [--help]`);
-  console.log(" ");
   console.log(
     chalk.yellow(
-      `Please note: you should set the OPENAI_API_KEY environment variable before running the generate command eg. ${chalk.bgGray.white("OPENAI_API_KEY=mykey npx gendb generate")}`,
+      `Please note: the --key argument should be set to your OpenAI api key. If you do not supply the --key argument you must have the OPENAI_API_KEY environment variable set before running the generate command.`,
     ),
   );
+  console.log(`- gendb apply <filePath> [--help]`);
   console.log(" ");
   process.exit(0);
 }

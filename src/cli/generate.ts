@@ -31,6 +31,7 @@ export default async function generate(args: minimist.ParsedArgs) {
     .object({
       businessSummary: z.string().optional(),
       companyName: z.string().optional(),
+      key: z.string().optional(),
     })
     .safeParse(args);
   if (!success) {
@@ -40,7 +41,7 @@ export default async function generate(args: minimist.ParsedArgs) {
     process.exit(0);
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = maybeInputs.key ?? process.env.OPENAI_API_KEY;
   if (!apiKey) {
     console.error(
       "generate called without an OpenAI API key. Run with --help for help.",
