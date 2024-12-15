@@ -25,3 +25,9 @@ Simply add `import { functionName } from 'gendb'` to your code.
 ## Roadmap
 
 - Add ability to edit the tables and columns of the generated data model via CLI prompts.
+- Add support for more common databases.
+- Add tests for `./service` functions
+
+## Contributing
+
+Open a PR!
