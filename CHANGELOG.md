@@ -1,5 +1,11 @@
 # generative-db
 
+## 0.2.1
+
+### Patch Changes
+
+- 3456a28: Fix the key argument not being propagated to the OpenAI client
+
 ## 0.2.0
 
 ### Minor Changes
