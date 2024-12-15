@@ -32,9 +32,12 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "generate": "dotenvx run -f .env.local -- node dist/cli/generate.js",
-    "apply": "dotenvx run -f .env.local -- node dist/cli/apply.js"
+    "apply": "dotenvx run -f .env.local -- node dist/cli/apply.js",
+    "changeset": "tsc && changeset",
+    "ci:release": "turbo run build lint test && changeset version && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.10",
     "@dotenvx/dotenvx": "^1.29.0",
     "@types/minimist": "^1.2.5",
     "prettier": "3.4.2"
