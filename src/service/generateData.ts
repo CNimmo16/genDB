@@ -15,7 +15,7 @@ export type RowsByTable = {
 export async function generateData(
   businessSummary: string,
   tables: Table[],
-  log: (message: string) => void,
+  log: (message: string) => void = () => {},
 ): Promise<{
   rowsByTable: RowsByTable;
   tokensUsed: number;
