@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import minimist from "minimist";
 import { help } from "./shared/help.js";
 import { readFileSync } from "fs";

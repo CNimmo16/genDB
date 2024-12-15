@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { confirm, input, number, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import { z } from "zod";
