@@ -1,5 +1,11 @@
 # generative-db
 
+## 0.1.2
+
+### Patch Changes
+
+- a6ce8de: Move to single bin script "gendb"
+
 ## 0.1.1
 
 ### Patch Changes
