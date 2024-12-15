@@ -42,6 +42,7 @@ export default async function generate(args: minimist.ParsedArgs) {
   }
 
   const apiKey = maybeInputs.key ?? process.env.OPENAI_API_KEY;
+  process.env.OPENAI_API_KEY = apiKey;
   if (!apiKey) {
     console.error(
       "generate called without an OpenAI API key. Run with --help for help.",
