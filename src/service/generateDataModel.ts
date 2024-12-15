@@ -1,7 +1,7 @@
 import generateResponse from "../util/generateResponse.js";
 import { z } from "zod";
 
-enum DataType {
+export enum DataType {
   UUID = "uuid",
   Text = "text",
   Integer = "integer",
@@ -20,7 +20,6 @@ export async function generateDataModel({
   companyName,
 }: GenerateDataModelInputs) {
   const { response: dataModel } = await generateResponse(
-    "Generating data model",
     [
       {
         role: "user",

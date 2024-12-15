@@ -9,7 +9,6 @@ const openai = new OpenAI({
 });
 
 export default async function generateResponse<T extends ZodType>(
-  loadingText: string | null,
   messages: ChatCompletionMessageParam[],
   validator: T,
   dataDesc: string,
@@ -22,27 +21,20 @@ export default async function generateResponse<T extends ZodType>(
 ): Promise<{
   response: z.infer<T>;
 }> {
-  const cb = async () => {
-    const {
-      choices: [
-        {
-          message: { parsed },
-        },
-      ],
-    } = await openai.beta.chat.completions.parse({
-      messages,
-      response_format: zodResponseFormat(
-        validator,
-        `${dataDesc}_response_format`,
-      ),
-      ...options,
-    });
-
-    return parsed;
-  };
-  const parsed = loadingText
-    ? await actionWithLoading(loadingText, cb)
-    : await cb();
+  const {
+    choices: [
+      {
+        message: { parsed },
+      },
+    ],
+  } = await openai.beta.chat.completions.parse({
+    messages,
+    response_format: zodResponseFormat(
+      validator,
+      `${dataDesc}_response_format`,
+    ),
+    ...options,
+  });
 
   if (!parsed) {
     throw new Error("Failed to generate response");

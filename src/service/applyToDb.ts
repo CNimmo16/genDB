@@ -25,36 +25,29 @@ export async function applyToDb(
 
   const db = knex(dbConfig);
 
-  try {
-    await db.transaction(async (trx) => {
-      for (const tableName of createOrder) {
-        const table = tables.find((t) => t.name === tableName);
-        if (!table) {
-          throw new Error(`Could not find table ${tableName}`);
-        }
-        await trx.schema.createTable(tableName, (t) => {
-          for (const column of table.columns) {
-            const c = t[column.type](column.name);
-            if (column.isPrimaryKey) {
-              c.primary();
-            }
-            if (column.foreignKey) {
-              c.references(column.foreignKey.referencedColumn).inTable(
-                column.foreignKey.referencedTable,
-              );
-            }
-          }
-        });
-
-        await trx(tableName).insert(rowsByTable[tableName]);
-
-        log(`- Created table and inserted rows for ${chalk.green(tableName)}`);
+  await db.transaction(async (trx) => {
+    for (const tableName of createOrder) {
+      const table = tables.find((t) => t.name === tableName);
+      if (!table) {
+        throw new Error(`Could not find table ${tableName}`);
       }
-    });
-  } catch (e) {
-    // TODO: Save data model to a temporary file if crashes, add check for temporary file and option to restore when starting cli
-    log(chalk.red(`Error creating database tables. Rejecting with error.`));
-    console.error(e);
-    process.exit(1);
-  }
+      await trx.schema.createTable(tableName, (t) => {
+        for (const column of table.columns) {
+          const c = t[column.type](column.name);
+          if (column.isPrimaryKey) {
+            c.primary();
+          }
+          if (column.foreignKey) {
+            c.references(column.foreignKey.referencedColumn).inTable(
+              column.foreignKey.referencedTable,
+            );
+          }
+        }
+      });
+
+      await trx(tableName).insert(rowsByTable[tableName]);
+
+      log(`- Created table and inserted rows for ${chalk.green(tableName)}`);
+    }
+  });
 }

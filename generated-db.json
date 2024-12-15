@@ -1,0 +1,2088 @@
+{
+  "businessSummary": "A marketplace for credit providers to offer loans products to consumers, including an online application system with a way for clients to review applications and query applicants for additional information",
+  "companyName": "LoanLink",
+  "tables": [
+    {
+      "name": "Users",
+      "columns": [
+        {
+          "name": "user_id",
+          "isPrimaryKey": true,
+          "type": "uuid"
+        },
+        {
+          "name": "first_name",
+          "isPrimaryKey": false,
+          "type": "text"
+        },
+        {
+          "name": "last_name",
+          "isPrimaryKey": false,
+          "type": "text"
+        },
+        {
+          "name": "email",
+          "isPrimaryKey": false,
+          "type": "text"
+        },
+        {
+          "name": "password",
+          "isPrimaryKey": false,
+          "type": "text"
+        },
+        {
+          "name": "user_type",
+          "isPrimaryKey": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "CreditProviders",
+      "columns": [
+        {
+          "name": "provider_id",
+          "isPrimaryKey": true,
+          "type": "uuid"
+        },
+        {
+          "name": "name",
+          "isPrimaryKey": false,
+          "type": "text"
+        },
+        {
+          "name": "email",
+          "isPrimaryKey": false,
+          "type": "text"
+        },
+        {
+          "name": "contact_number",
+          "isPrimaryKey": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "LoanProducts",
+      "columns": [
+        {
+          "name": "product_id",
+          "isPrimaryKey": true,
+          "type": "uuid"
+        },
+        {
+          "name": "provider_id",
+          "isPrimaryKey": false,
+          "type": "uuid",
+          "foreignKey": {
+            "referencedTable": "CreditProviders",
+            "referencedColumn": "provider_id"
+          }
+        },
+        {
+          "name": "name",
+          "isPrimaryKey": false,
+          "type": "text"
+        },
+        {
+          "name": "interest_rate",
+          "isPrimaryKey": false,
+          "type": "float"
+        },
+        {
+          "name": "loan_term",
+          "isPrimaryKey": false,
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "Applications",
+      "columns": [
+        {
+          "name": "application_id",
+          "isPrimaryKey": true,
+          "type": "uuid"
+        },
+        {
+          "name": "user_id",
+          "isPrimaryKey": false,
+          "type": "uuid",
+          "foreignKey": {
+            "referencedTable": "Users",
+            "referencedColumn": "user_id"
+          }
+        },
+        {
+          "name": "product_id",
+          "isPrimaryKey": false,
+          "type": "uuid",
+          "foreignKey": {
+            "referencedTable": "LoanProducts",
+            "referencedColumn": "product_id"
+          }
+        },
+        {
+          "name": "application_date",
+          "isPrimaryKey": false,
+          "type": "datetime"
+        },
+        {
+          "name": "status",
+          "isPrimaryKey": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "ApplicationDetails",
+      "columns": [
+        {
+          "name": "detail_id",
+          "isPrimaryKey": true,
+          "type": "uuid"
+        },
+        {
+          "name": "application_id",
+          "isPrimaryKey": false,
+          "type": "uuid",
+          "foreignKey": {
+            "referencedTable": "Applications",
+            "referencedColumn": "application_id"
+          }
+        },
+        {
+          "name": "requested_amount",
+          "isPrimaryKey": false,
+          "type": "float"
+        },
+        {
+          "name": "purpose",
+          "isPrimaryKey": false,
+          "type": "text"
+        },
+        {
+          "name": "additional_information",
+          "isPrimaryKey": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "columns": [
+        {
+          "name": "review_id",
+          "isPrimaryKey": true,
+          "type": "uuid"
+        },
+        {
+          "name": "application_id",
+          "isPrimaryKey": false,
+          "type": "uuid",
+          "foreignKey": {
+            "referencedTable": "Applications",
+            "referencedColumn": "application_id"
+          }
+        },
+        {
+          "name": "reviewed_by",
+          "isPrimaryKey": false,
+          "type": "uuid",
+          "foreignKey": {
+            "referencedTable": "Users",
+            "referencedColumn": "user_id"
+          }
+        },
+        {
+          "name": "review_date",
+          "isPrimaryKey": false,
+          "type": "datetime"
+        },
+        {
+          "name": "comments",
+          "isPrimaryKey": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "Queries",
+      "columns": [
+        {
+          "name": "query_id",
+          "isPrimaryKey": true,
+          "type": "uuid"
+        },
+        {
+          "name": "application_id",
+          "isPrimaryKey": false,
+          "type": "uuid",
+          "foreignKey": {
+            "referencedTable": "Applications",
+            "referencedColumn": "application_id"
+          }
+        },
+        {
+          "name": "query_date",
+          "isPrimaryKey": false,
+          "type": "datetime"
+        },
+        {
+          "name": "query_content",
+          "isPrimaryKey": false,
+          "type": "text"
+        },
+        {
+          "name": "response",
+          "isPrimaryKey": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "QueryResponses",
+      "columns": [
+        {
+          "name": "response_id",
+          "isPrimaryKey": true,
+          "type": "uuid"
+        },
+        {
+          "name": "query_id",
+          "isPrimaryKey": false,
+          "type": "uuid",
+          "foreignKey": {
+            "referencedTable": "Queries",
+            "referencedColumn": "query_id"
+          }
+        },
+        {
+          "name": "response_date",
+          "isPrimaryKey": false,
+          "type": "datetime"
+        },
+        {
+          "name": "response_content",
+          "isPrimaryKey": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "ProviderQueries",
+      "columns": [
+        {
+          "name": "query_provider_id",
+          "isPrimaryKey": true,
+          "type": "uuid"
+        },
+        {
+          "name": "provider_id",
+          "isPrimaryKey": false,
+          "type": "uuid",
+          "foreignKey": {
+            "referencedTable": "CreditProviders",
+            "referencedColumn": "provider_id"
+          }
+        },
+        {
+          "name": "query_date",
+          "isPrimaryKey": false,
+          "type": "datetime"
+        },
+        {
+          "name": "query_content",
+          "isPrimaryKey": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "columns": [
+        {
+          "name": "notification_id",
+          "isPrimaryKey": true,
+          "type": "uuid"
+        },
+        {
+          "name": "user_id",
+          "isPrimaryKey": false,
+          "type": "uuid",
+          "foreignKey": {
+            "referencedTable": "Users",
+            "referencedColumn": "user_id"
+          }
+        },
+        {
+          "name": "notification_date",
+          "isPrimaryKey": false,
+          "type": "datetime"
+        },
+        {
+          "name": "message",
+          "isPrimaryKey": false,
+          "type": "text"
+        },
+        {
+          "name": "is_read",
+          "isPrimaryKey": false,
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "rowsByTable": {
+    "Users": [
+      {
+        "user_id": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "first_name": "John",
+        "last_name": "Smith",
+        "email": "jane.doe@example.com",
+        "password": "G3x&zQ1p$Hg8",
+        "user_type": "individual"
+      },
+      {
+        "user_id": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "first_name": "Emily",
+        "last_name": "Johnson",
+        "email": "john.smith@example.com",
+        "password": "P@55w0rdF#3Jk",
+        "user_type": "business"
+      },
+      {
+        "user_id": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "first_name": "Michael",
+        "last_name": "Williams",
+        "email": "alice.johnson@example.com",
+        "password": "M!cR0b8*Dq5t",
+        "user_type": "partner"
+      },
+      {
+        "user_id": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "first_name": "Sarah",
+        "last_name": "Brown",
+        "email": "carl.brown@example.com",
+        "password": "Xr!Tu5$eP2nL",
+        "user_type": "broker"
+      },
+      {
+        "user_id": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "first_name": "David",
+        "last_name": "Jones",
+        "email": "emily.williams@example.com",
+        "password": "R7e@Wq4#jY8u",
+        "user_type": "aggregator"
+      }
+    ],
+    "CreditProviders": [
+      {
+        "provider_id": "76afb9ac-3a3f-4018-971f-2930003d0974",
+        "name": "QuickLoan Solutions",
+        "email": "lendersupport@example.com",
+        "contact_number": "(555) 123-4567"
+      },
+      {
+        "provider_id": "93eb5933-44fc-4ea5-a6fc-43b39d382ce2",
+        "name": "Finanza Group",
+        "email": "info@fastloans.com",
+        "contact_number": "(555) 987-6543"
+      },
+      {
+        "provider_id": "307601d4-d809-4bd2-a13d-d62e104f1f32",
+        "name": "CreditEase Lending",
+        "email": "contact@creditworld.com",
+        "contact_number": "(555) 234-5678"
+      },
+      {
+        "provider_id": "baf0e579-2de5-4ddf-8494-e6730e49587f",
+        "name": "CapitalBridge Loans",
+        "email": "help@loanprovider.com",
+        "contact_number": "(555) 876-5432"
+      },
+      {
+        "provider_id": "d9d79337-0be5-4a58-9869-48b5bbdab396",
+        "name": "Trusty Finance",
+        "email": "service@easycredit.com",
+        "contact_number": "(555) 345-6789"
+      }
+    ],
+    "LoanProducts": [
+      {
+        "product_id": "8095155c-9e8d-4e53-8add-81907dd123b4",
+        "provider_id": "d9d79337-0be5-4a58-9869-48b5bbdab396",
+        "name": "QuickCash Personal Loan",
+        "interest_rate": "89.13",
+        "loan_term": "12"
+      },
+      {
+        "product_id": "fb1794b7-8719-4de1-bb7c-c2e2b711b8b7",
+        "provider_id": "93eb5933-44fc-4ea5-a6fc-43b39d382ce2",
+        "name": "Home Improvement Loan",
+        "interest_rate": "21.19",
+        "loan_term": "24"
+      },
+      {
+        "product_id": "c1131f0a-9389-4de4-a365-96cdfba774ad",
+        "provider_id": "baf0e579-2de5-4ddf-8494-e6730e49587f",
+        "name": "Auto Refinance Loan",
+        "interest_rate": "88.07",
+        "loan_term": "36"
+      },
+      {
+        "product_id": "70de1972-ae5a-4a04-b3c1-21072a862c27",
+        "provider_id": "baf0e579-2de5-4ddf-8494-e6730e49587f",
+        "name": "Debt Consolidation Loan",
+        "interest_rate": "97.42",
+        "loan_term": "48"
+      },
+      {
+        "product_id": "8df5bd83-a872-4b17-8aa3-4f64d70e2d58",
+        "provider_id": "76afb9ac-3a3f-4018-971f-2930003d0974",
+        "name": "Student Loan Refinancing",
+        "interest_rate": "84.17",
+        "loan_term": "60"
+      },
+      {
+        "product_id": "2e4d9ac0-e77f-4160-8a0f-1c227305dea2",
+        "provider_id": "307601d4-d809-4bd2-a13d-d62e104f1f32",
+        "name": "Small Business Loan",
+        "interest_rate": "35.21",
+        "loan_term": "72"
+      },
+      {
+        "product_id": "271e940b-ff4c-430d-8c58-15b5c0072534",
+        "provider_id": "d9d79337-0be5-4a58-9869-48b5bbdab396",
+        "name": "Payday Alternative Loan",
+        "interest_rate": "88.58",
+        "loan_term": "84"
+      },
+      {
+        "product_id": "4cd4ed2b-9e1d-4c54-bd1f-ec13927d57dd",
+        "provider_id": "307601d4-d809-4bd2-a13d-d62e104f1f32",
+        "name": "Vacation Financing Loan",
+        "interest_rate": "51.75",
+        "loan_term": "96"
+      },
+      {
+        "product_id": "18b7ff78-1352-487e-96c2-a774efa3b09b",
+        "provider_id": "76afb9ac-3a3f-4018-971f-2930003d0974",
+        "name": "Medical Expense Loan",
+        "interest_rate": "76.91",
+        "loan_term": "108"
+      },
+      {
+        "product_id": "a26b88a8-3872-4899-8e00-ee69cac8642b",
+        "provider_id": "93eb5933-44fc-4ea5-a6fc-43b39d382ce2",
+        "name": "Home Equity Line of Credit",
+        "interest_rate": "19.97",
+        "loan_term": "120"
+      }
+    ],
+    "Applications": [
+      {
+        "application_id": "c3838762-9ebb-446b-9b70-e9ea412b88b7",
+        "user_id": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "product_id": "fb1794b7-8719-4de1-bb7c-c2e2b711b8b7",
+        "application_date": "2024-12-15T02:41:40.681Z",
+        "status": "Pending"
+      },
+      {
+        "application_id": "cd2d9ca7-edeb-4bdf-8266-6974c4cc5fa6",
+        "user_id": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "product_id": "a26b88a8-3872-4899-8e00-ee69cac8642b",
+        "application_date": "2024-05-05T02:41:40.681Z",
+        "status": "Approved"
+      },
+      {
+        "application_id": "83754f11-e0ac-46e9-a2f2-dbf059333249",
+        "user_id": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "product_id": "a26b88a8-3872-4899-8e00-ee69cac8642b",
+        "application_date": "2024-12-03T02:41:40.681Z",
+        "status": "Denied"
+      },
+      {
+        "application_id": "533174d3-d639-487c-99f7-ee72561a9eca",
+        "user_id": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "product_id": "8095155c-9e8d-4e53-8add-81907dd123b4",
+        "application_date": "2024-05-14T02:41:40.681Z",
+        "status": "In Review"
+      },
+      {
+        "application_id": "e816ec34-f492-4677-9779-f842f38e48ca",
+        "user_id": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "product_id": "70de1972-ae5a-4a04-b3c1-21072a862c27",
+        "application_date": "2024-06-05T02:41:40.681Z",
+        "status": "Under Approval"
+      },
+      {
+        "application_id": "8e5e8855-5baf-48f5-ad2b-c18c5f4e4791",
+        "user_id": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "product_id": "2e4d9ac0-e77f-4160-8a0f-1c227305dea2",
+        "application_date": "2024-12-10T02:41:40.681Z",
+        "status": "Awaiting Documentation"
+      },
+      {
+        "application_id": "bf632068-be1c-4a67-aac4-fb23b1f6c96f",
+        "user_id": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "product_id": "8df5bd83-a872-4b17-8aa3-4f64d70e2d58",
+        "application_date": "2024-12-03T02:41:40.681Z",
+        "status": "Completed"
+      },
+      {
+        "application_id": "57b173ce-bba3-4f1c-b0a6-7a6bf4e57a28",
+        "user_id": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "product_id": "4cd4ed2b-9e1d-4c54-bd1f-ec13927d57dd",
+        "application_date": "2024-09-06T02:41:40.681Z",
+        "status": "Postponed"
+      },
+      {
+        "application_id": "6fb2fc68-7a4e-4dd6-b70c-c288914d0b6c",
+        "user_id": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "product_id": "2e4d9ac0-e77f-4160-8a0f-1c227305dea2",
+        "application_date": "2024-12-02T02:41:40.681Z",
+        "status": "Rejected"
+      },
+      {
+        "application_id": "d10e66c7-fbc1-4667-83a7-f1021dfe9147",
+        "user_id": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "product_id": "18b7ff78-1352-487e-96c2-a774efa3b09b",
+        "application_date": "2024-12-11T02:41:40.681Z",
+        "status": "Needs More Information"
+      },
+      {
+        "application_id": "d9fb6bd8-b5fb-4fb8-ac24-780bd897152b",
+        "user_id": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "product_id": "8df5bd83-a872-4b17-8aa3-4f64d70e2d58",
+        "application_date": "2024-11-29T02:41:40.681Z",
+        "status": "Final Review"
+      },
+      {
+        "application_id": "67358f1f-5ac3-4fcc-9f3e-8f92e715bac7",
+        "user_id": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "product_id": "c1131f0a-9389-4de4-a365-96cdfba774ad",
+        "application_date": "2024-12-07T02:41:40.681Z",
+        "status": "Accepted"
+      },
+      {
+        "application_id": "07244904-43aa-45aa-bf48-cb29ae22e801",
+        "user_id": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "product_id": "271e940b-ff4c-430d-8c58-15b5c0072534",
+        "application_date": "2024-12-13T02:41:40.681Z",
+        "status": "Cancelled"
+      },
+      {
+        "application_id": "4c387607-f38a-4bc2-ab6a-5f2ce72a4636",
+        "user_id": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "product_id": "70de1972-ae5a-4a04-b3c1-21072a862c27",
+        "application_date": "2024-02-06T02:41:40.681Z",
+        "status": "Expired"
+      },
+      {
+        "application_id": "0b8d216a-b8d7-42af-8048-00964722dc2a",
+        "user_id": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "product_id": "271e940b-ff4c-430d-8c58-15b5c0072534",
+        "application_date": "2024-12-04T02:41:40.681Z",
+        "status": "Withdrawal Requested"
+      },
+      {
+        "application_id": "595d0a8d-4ad6-43e4-8252-3ff2ec814b7c",
+        "user_id": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "product_id": "18b7ff78-1352-487e-96c2-a774efa3b09b",
+        "application_date": "2024-06-16T02:41:40.681Z",
+        "status": "Closed"
+      },
+      {
+        "application_id": "0f981193-e513-421d-aa51-fd3257d94526",
+        "user_id": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "product_id": "fb1794b7-8719-4de1-bb7c-c2e2b711b8b7",
+        "application_date": "2024-12-06T02:41:40.681Z",
+        "status": "Open"
+      },
+      {
+        "application_id": "fe442be9-7a50-43a2-826f-211d786b8b2c",
+        "user_id": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "product_id": "c1131f0a-9389-4de4-a365-96cdfba774ad",
+        "application_date": "2024-12-09T02:41:40.681Z",
+        "status": "Place on Hold"
+      },
+      {
+        "application_id": "64b9e1a6-257f-4831-bb7c-fef12ad26fbf",
+        "user_id": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "product_id": "4cd4ed2b-9e1d-4c54-bd1f-ec13927d57dd",
+        "application_date": "2024-06-23T02:41:40.681Z",
+        "status": "Resubmitted"
+      },
+      {
+        "application_id": "c347aaf0-ba78-4af3-a622-e587a4a4981a",
+        "user_id": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "product_id": "8095155c-9e8d-4e53-8add-81907dd123b4",
+        "application_date": "2024-08-27T02:41:40.681Z",
+        "status": "Archived"
+      }
+    ],
+    "ApplicationDetails": [
+      {
+        "detail_id": "27b1ce0c-a4c8-4357-8580-cdaaa993692d",
+        "application_id": "67358f1f-5ac3-4fcc-9f3e-8f92e715bac7",
+        "requested_amount": "48.89",
+        "purpose": "Debt Consolidation",
+        "additional_information": "Please provide proof of income for the last three months."
+      },
+      {
+        "detail_id": "3539db6e-2877-4d32-8100-6370afb19121",
+        "application_id": "64b9e1a6-257f-4831-bb7c-fef12ad26fbf",
+        "requested_amount": "80.30",
+        "purpose": "Home Renovation",
+        "additional_information": "Can you clarify the purpose of this loan application?"
+      },
+      {
+        "detail_id": "fbfa7c24-d4f0-491b-90f6-f527395c7cfc",
+        "application_id": "57b173ce-bba3-4f1c-b0a6-7a6bf4e57a28",
+        "requested_amount": "28.06",
+        "purpose": "Medical Expenses",
+        "additional_information": "We require additional documentation regarding your employment status."
+      },
+      {
+        "detail_id": "7f3ec4cd-b196-46e6-9d12-1cbf185ec030",
+        "application_id": "6fb2fc68-7a4e-4dd6-b70c-c288914d0b6c",
+        "requested_amount": "95.33",
+        "purpose": "Education Funding",
+        "additional_information": "Please upload your most recent bank statements."
+      },
+      {
+        "detail_id": "c5ffedf1-6098-4618-8fe4-c29c6149abc1",
+        "application_id": "cd2d9ca7-edeb-4bdf-8266-6974c4cc5fa6",
+        "requested_amount": "69.83",
+        "purpose": "Vacation Financing",
+        "additional_information": "Could you specify your monthly expenses?"
+      },
+      {
+        "detail_id": "f1882f88-547b-431d-ba70-694e2cb4511e",
+        "application_id": "d10e66c7-fbc1-4667-83a7-f1021dfe9147",
+        "requested_amount": "31.69",
+        "purpose": "Car Purchase",
+        "additional_information": "We need a copy of your credit report."
+      },
+      {
+        "detail_id": "e9476f8a-b2fc-40b0-b24e-62ea6f38e749",
+        "application_id": "4c387607-f38a-4bc2-ab6a-5f2ce72a4636",
+        "requested_amount": "58.89",
+        "purpose": "Wedding Expenses",
+        "additional_information": "What is your expected timeline for repaying the loan?"
+      },
+      {
+        "detail_id": "34ce245e-a849-4ffa-944a-fb64e2b9bf81",
+        "application_id": "0f981193-e513-421d-aa51-fd3257d94526",
+        "requested_amount": "53.05",
+        "purpose": "Emergency Funds",
+        "additional_information": "Please provide details of any other loans you currently have."
+      },
+      {
+        "detail_id": "3dd26998-eade-450d-bd75-2e7abbe7d390",
+        "application_id": "e816ec34-f492-4677-9779-f842f38e48ca",
+        "requested_amount": "45.85",
+        "purpose": "Small Business Start-up",
+        "additional_information": "Can you explain any recent changes in your income?"
+      },
+      {
+        "detail_id": "494fd0a5-fdb9-403f-ae78-bf45bbe46c6e",
+        "application_id": "e816ec34-f492-4677-9779-f842f38e48ca",
+        "requested_amount": "78.80",
+        "purpose": "Investment Opportunities",
+        "additional_information": "Please confirm your residential address and ownership status."
+      },
+      {
+        "detail_id": "5d97f062-b497-419f-8496-bf4f855cc21b",
+        "application_id": "c347aaf0-ba78-4af3-a622-e587a4a4981a",
+        "requested_amount": "17.50",
+        "purpose": "Home Purchase",
+        "additional_information": "We need clarification on your annual income figure."
+      },
+      {
+        "detail_id": "5471874c-98a7-43c7-ab3e-9410d647ee61",
+        "application_id": "533174d3-d639-487c-99f7-ee72561a9eca",
+        "requested_amount": "85.12",
+        "purpose": "Credit Card Payoff",
+        "additional_information": "What is the preferred method of communication for follow-ups?"
+      },
+      {
+        "detail_id": "cbc55216-3d6c-4c0f-9fa1-3fa7f001207b",
+        "application_id": "57b173ce-bba3-4f1c-b0a6-7a6bf4e57a28",
+        "requested_amount": "12.95",
+        "purpose": "Home Improvement",
+        "additional_information": "Please provide the contact information for your employer."
+      },
+      {
+        "detail_id": "07bb0043-348c-4b03-8c91-1bf2df9e8832",
+        "application_id": "c347aaf0-ba78-4af3-a622-e587a4a4981a",
+        "requested_amount": "24.99",
+        "purpose": "Vehicle Repairs",
+        "additional_information": "Do you have a guarantor for this loan? If yes, please provide details."
+      },
+      {
+        "detail_id": "1619b646-4cb0-4ebf-9737-93a2f4e0d227",
+        "application_id": "0b8d216a-b8d7-42af-8048-00964722dc2a",
+        "requested_amount": "4.14",
+        "purpose": "Travel Expenses",
+        "additional_information": "Can you submit a detailed budget for the use of loan funds?"
+      },
+      {
+        "detail_id": "1efeb516-6f22-4ba6-8576-60a10f575050",
+        "application_id": "4c387607-f38a-4bc2-ab6a-5f2ce72a4636",
+        "requested_amount": "49.53",
+        "purpose": "Relocation Costs",
+        "additional_information": "Please specify if you have any pending legal issues."
+      },
+      {
+        "detail_id": "5ad9a04a-dbe4-4bc8-bcba-24c3e79db547",
+        "application_id": "d10e66c7-fbc1-4667-83a7-f1021dfe9147",
+        "requested_amount": "55.32",
+        "purpose": "Thesis or Dissertation Funding",
+        "additional_information": "We require your tax returns for the last two years."
+      },
+      {
+        "detail_id": "7a9f369b-9f21-4d16-a394-e6a5a0fc39b4",
+        "application_id": "8e5e8855-5baf-48f5-ad2b-c18c5f4e4791",
+        "requested_amount": "25.13",
+        "purpose": "Childcare Expenses",
+        "additional_information": "What is your current credit score?"
+      },
+      {
+        "detail_id": "c567c038-82d8-4f03-8240-b4cb425f850c",
+        "application_id": "533174d3-d639-487c-99f7-ee72561a9eca",
+        "requested_amount": "98.35",
+        "purpose": "Renewable Energy Installation",
+        "additional_information": "Can you provide a reference who can speak to your financial habits?"
+      },
+      {
+        "detail_id": "dccbe38e-d03f-4bad-a623-180d345800c0",
+        "application_id": "595d0a8d-4ad6-43e4-8252-3ff2ec814b7c",
+        "requested_amount": "52.80",
+        "purpose": "Personal Development Courses",
+        "additional_information": "Please specify the type of collateral you can provide."
+      },
+      {
+        "detail_id": "fdc01576-c75e-406b-930e-0ce0fd7b333c",
+        "application_id": "0b8d216a-b8d7-42af-8048-00964722dc2a",
+        "requested_amount": "89.56",
+        "purpose": "Special Occasion Gifts",
+        "additional_information": "We need more information regarding your work history."
+      },
+      {
+        "detail_id": "77e4904d-d714-4ee2-9257-50593eef7d12",
+        "application_id": "d9fb6bd8-b5fb-4fb8-ac24-780bd897152b",
+        "requested_amount": "4.91",
+        "purpose": "Tax Payments",
+        "additional_information": "Are there any co-applicants for this loan? If so, please provide their details."
+      },
+      {
+        "detail_id": "fdb0ee89-0516-40df-a63a-ef356ca934ea",
+        "application_id": "0f981193-e513-421d-aa51-fd3257d94526",
+        "requested_amount": "57.18",
+        "purpose": "Moving Expenses",
+        "additional_information": "Please elaborate on your financial goals over the next five years."
+      },
+      {
+        "detail_id": "cce9804b-1faf-43e4-a84d-efe90b160c52",
+        "application_id": "fe442be9-7a50-43a2-826f-211d786b8b2c",
+        "requested_amount": "38.28",
+        "purpose": "Medical Procedures",
+        "additional_information": "Can you clarify if any part of your income is variable?"
+      },
+      {
+        "detail_id": "2e5cd947-df01-49f0-9096-949bbc419289",
+        "application_id": "07244904-43aa-45aa-bf48-cb29ae22e801",
+        "requested_amount": "38.82",
+        "purpose": "Funeral Expenses",
+        "additional_information": "What challenges have you faced that prompted this loan application?"
+      },
+      {
+        "detail_id": "65b494d7-07ed-4b5c-a58f-e3c3121923bb",
+        "application_id": "83754f11-e0ac-46e9-a2f2-dbf059333249",
+        "requested_amount": "7.77",
+        "purpose": "Insurance Premiums",
+        "additional_information": "Please provide details on any significant assets you own."
+      },
+      {
+        "detail_id": "2f58c03c-cae5-4a82-9a10-3c97bf69ec09",
+        "application_id": "07244904-43aa-45aa-bf48-cb29ae22e801",
+        "requested_amount": "43.51",
+        "purpose": "Gifts for Family",
+        "additional_information": "Are you currently involved in any credit counseling programs?"
+      },
+      {
+        "detail_id": "129134ec-be32-444b-bf18-09fc0502f83b",
+        "application_id": "fe442be9-7a50-43a2-826f-211d786b8b2c",
+        "requested_amount": "66.60",
+        "purpose": "Home Appliances Purchase",
+        "additional_information": "Can you provide an explanation for any recent credit inquiries?"
+      },
+      {
+        "detail_id": "79b0608c-17f7-4907-aa07-f1626f33d4ae",
+        "application_id": "cd2d9ca7-edeb-4bdf-8266-6974c4cc5fa6",
+        "requested_amount": "33.25",
+        "purpose": "Technology Upgrade",
+        "additional_information": "Please confirm your citizenship or residency status."
+      },
+      {
+        "detail_id": "f949272e-4e03-4317-9eb1-3e031a2bb232",
+        "application_id": "c3838762-9ebb-446b-9b70-e9ea412b88b7",
+        "requested_amount": "15.04",
+        "purpose": "Business Expansion Loans",
+        "additional_information": "Can you provide additional background information on your financial situation?"
+      },
+      {
+        "detail_id": "b1684bce-9e9f-4c66-b214-c05c734705b2",
+        "application_id": "6fb2fc68-7a4e-4dd6-b70c-c288914d0b6c",
+        "requested_amount": "37.17",
+        "purpose": "Debt Consolidation",
+        "additional_information": "Please let us know of any changes in your financial status during the application process."
+      },
+      {
+        "detail_id": "dda6dbd6-6225-4348-a274-debbdd8be54e",
+        "application_id": "bf632068-be1c-4a67-aac4-fb23b1f6c96f",
+        "requested_amount": "50.96",
+        "purpose": "Home Improvement",
+        "additional_information": "Please provide your employment history for the last two years."
+      },
+      {
+        "detail_id": "2dc7da42-adb7-4dce-b0b2-441cb6df1270",
+        "application_id": "67358f1f-5ac3-4fcc-9f3e-8f92e715bac7",
+        "requested_amount": "99.77",
+        "purpose": "Personal Expenses",
+        "additional_information": "What is the purpose of the loan you are applying for?"
+      },
+      {
+        "detail_id": "310dec28-4bdc-4180-a0cc-da6ffa8b63f8",
+        "application_id": "d9fb6bd8-b5fb-4fb8-ac24-780bd897152b",
+        "requested_amount": "15.98",
+        "purpose": "Medical Expenses",
+        "additional_information": "Do you have any existing loans that we should be aware of?"
+      },
+      {
+        "detail_id": "d27a36ef-1c5e-4335-907a-f0b21f8545a0",
+        "application_id": "8e5e8855-5baf-48f5-ad2b-c18c5f4e4791",
+        "requested_amount": "99.61",
+        "purpose": "Education",
+        "additional_information": "Can you upload your latest bank statements for verification?"
+      },
+      {
+        "detail_id": "1ed779fd-15c3-459c-bd29-3a10f2e3b505",
+        "application_id": "83754f11-e0ac-46e9-a2f2-dbf059333249",
+        "requested_amount": "39.62",
+        "purpose": "Car Purchase",
+        "additional_information": "Please indicate if you have any co-applicants on this application."
+      },
+      {
+        "detail_id": "819f4546-5627-4fd2-971b-64e61bf10168",
+        "application_id": "595d0a8d-4ad6-43e4-8252-3ff2ec814b7c",
+        "requested_amount": "92.56",
+        "purpose": "Vacation",
+        "additional_information": "What is your preferred method of contact during the application process?"
+      },
+      {
+        "detail_id": "5959edc4-1f7c-495d-b3f4-50b400934a3a",
+        "application_id": "c3838762-9ebb-446b-9b70-e9ea412b88b7",
+        "requested_amount": "7.07",
+        "purpose": "Business Investment",
+        "additional_information": "Are there any special conditions or requests we should consider?"
+      },
+      {
+        "detail_id": "2f8ed9fe-ff9a-4ac8-bea0-8b80fd6328eb",
+        "application_id": "64b9e1a6-257f-4831-bb7c-fef12ad26fbf",
+        "requested_amount": "80.15",
+        "purpose": "Emergency Expenses",
+        "additional_information": "Please confirm your current residential address and how long you have lived there."
+      },
+      {
+        "detail_id": "bb90109f-dd66-468e-beea-6faccc939f51",
+        "application_id": "bf632068-be1c-4a67-aac4-fb23b1f6c96f",
+        "requested_amount": "57.43",
+        "purpose": "Wedding Expenses",
+        "additional_information": "Do you have any additional income sources we should consider for your application?"
+      }
+    ],
+    "Reviews": [
+      {
+        "review_id": "ac221915-0144-4f03-a22b-b307ba6f4c4c",
+        "application_id": "fe442be9-7a50-43a2-826f-211d786b8b2c",
+        "reviewed_by": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "review_date": "2024-12-07T02:41:47.138Z",
+        "comments": "Quick and easy application process!"
+      },
+      {
+        "review_id": "b40d6adf-8350-48fe-b08e-e179571d0e47",
+        "application_id": "0f981193-e513-421d-aa51-fd3257d94526",
+        "reviewed_by": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "review_date": "2024-03-11T02:41:47.138Z",
+        "comments": "I received the funds faster than expected."
+      },
+      {
+        "review_id": "a223b588-9ea8-4ee6-8300-0b95da93019d",
+        "application_id": "64b9e1a6-257f-4831-bb7c-fef12ad26fbf",
+        "reviewed_by": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "review_date": "2024-05-03T02:41:47.138Z",
+        "comments": "Great customer service and support."
+      },
+      {
+        "review_id": "b2cc29b9-2d1e-4a93-ad9b-75c73dff3339",
+        "application_id": "595d0a8d-4ad6-43e4-8252-3ff2ec814b7c",
+        "reviewed_by": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "review_date": "2024-12-09T02:41:47.138Z",
+        "comments": "The interest rates were quite reasonable."
+      },
+      {
+        "review_id": "1865c909-ccf6-4e62-aadd-b3e6946e4852",
+        "application_id": "67358f1f-5ac3-4fcc-9f3e-8f92e715bac7",
+        "reviewed_by": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "review_date": "2024-12-11T02:41:47.138Z",
+        "comments": "I appreciated the transparency of the terms."
+      },
+      {
+        "review_id": "a021e645-dc32-4e6e-a468-721d041d6e74",
+        "application_id": "533174d3-d639-487c-99f7-ee72561a9eca",
+        "reviewed_by": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "review_date": "2024-12-13T02:41:47.138Z",
+        "comments": "The online application was user-friendly."
+      },
+      {
+        "review_id": "427d93ec-063e-4406-9bdb-fab36f76d445",
+        "application_id": "c347aaf0-ba78-4af3-a622-e587a4a4981a",
+        "reviewed_by": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "review_date": "2024-11-20T02:41:47.138Z",
+        "comments": "I had some questions, but they were answered promptly."
+      },
+      {
+        "review_id": "1e880985-449f-4643-b953-a243faab2621",
+        "application_id": "4c387607-f38a-4bc2-ab6a-5f2ce72a4636",
+        "reviewed_by": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "review_date": "2024-11-28T02:41:47.138Z",
+        "comments": "The loan approval process was straightforward."
+      },
+      {
+        "review_id": "91e88dc1-83ee-4cab-9f20-34f0bcad243f",
+        "application_id": "c3838762-9ebb-446b-9b70-e9ea412b88b7",
+        "reviewed_by": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "review_date": "2024-03-21T02:41:47.138Z",
+        "comments": "I wish there were more options to choose from."
+      },
+      {
+        "review_id": "b9b50939-098c-449c-a226-b2323ece9b87",
+        "application_id": "fe442be9-7a50-43a2-826f-211d786b8b2c",
+        "reviewed_by": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "review_date": "2024-12-04T02:41:47.138Z",
+        "comments": "The repayment options are flexible and manageable."
+      },
+      {
+        "review_id": "0be2defe-e5a9-42f3-92b5-b7f410db8b72",
+        "application_id": "0b8d216a-b8d7-42af-8048-00964722dc2a",
+        "reviewed_by": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "review_date": "2024-11-11T02:41:47.138Z",
+        "comments": "I was a bit skeptical at first, but it worked out well."
+      },
+      {
+        "review_id": "e0f4c426-5817-42a8-8bbf-d377593a7fd3",
+        "application_id": "d10e66c7-fbc1-4667-83a7-f1021dfe9147",
+        "reviewed_by": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "review_date": "2024-12-15T02:41:47.138Z",
+        "comments": "Excellent experience overall! Highly recommend."
+      },
+      {
+        "review_id": "4f84a01a-a9e9-4b37-9f89-e86d2ce49cd8",
+        "application_id": "cd2d9ca7-edeb-4bdf-8266-6974c4cc5fa6",
+        "reviewed_by": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "review_date": "2024-12-05T02:41:47.138Z",
+        "comments": "I would definitely use this service again."
+      },
+      {
+        "review_id": "174aa402-3c25-466d-819c-ebda40ce34c1",
+        "application_id": "67358f1f-5ac3-4fcc-9f3e-8f92e715bac7",
+        "reviewed_by": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "review_date": "2024-12-04T02:41:47.138Z",
+        "comments": "The website is well-designed and informative."
+      },
+      {
+        "review_id": "f69a0b06-47c6-4ca8-bbd9-d6078c336a12",
+        "application_id": "4c387607-f38a-4bc2-ab6a-5f2ce72a4636",
+        "reviewed_by": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "review_date": "2024-09-04T02:41:47.138Z",
+        "comments": "The representatives were friendly and knowledgeable."
+      },
+      {
+        "review_id": "286804c9-8574-4d93-82e6-c64ca53b8cba",
+        "application_id": "e816ec34-f492-4677-9779-f842f38e48ca",
+        "reviewed_by": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "review_date": "2024-12-06T02:41:47.138Z",
+        "comments": "The documentation required was minimal."
+      },
+      {
+        "review_id": "123954e3-259f-43c8-90be-09ea7bc8b4a2",
+        "application_id": "e816ec34-f492-4677-9779-f842f38e48ca",
+        "reviewed_by": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "review_date": "2024-11-25T02:41:47.138Z",
+        "comments": "I got my loan without any hassles."
+      },
+      {
+        "review_id": "6fbe3a3c-4625-41e1-a092-1c7415bc8672",
+        "application_id": "57b173ce-bba3-4f1c-b0a6-7a6bf4e57a28",
+        "reviewed_by": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "review_date": "2024-03-20T02:41:47.138Z",
+        "comments": "A trustworthy platform for loans."
+      },
+      {
+        "review_id": "beabb9d0-eddd-4edb-90a2-8a47d79ace3c",
+        "application_id": "83754f11-e0ac-46e9-a2f2-dbf059333249",
+        "reviewed_by": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "review_date": "2024-12-03T02:41:47.138Z",
+        "comments": "Very satisfied with my experience here."
+      },
+      {
+        "review_id": "56f35ec4-69bb-42e6-904e-23a699163cde",
+        "application_id": "d9fb6bd8-b5fb-4fb8-ac24-780bd897152b",
+        "reviewed_by": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "review_date": "2024-05-21T02:41:47.138Z",
+        "comments": "I was surprised by how quickly I was approved."
+      },
+      {
+        "review_id": "2ea32c2e-0d5a-41d6-9b4e-b58565746dbc",
+        "application_id": "8e5e8855-5baf-48f5-ad2b-c18c5f4e4791",
+        "reviewed_by": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "review_date": "2024-04-29T02:41:47.138Z",
+        "comments": "I felt supported throughout the entire process."
+      },
+      {
+        "review_id": "454e37e6-0ce1-406a-b9f0-de7ce40dabfb",
+        "application_id": "07244904-43aa-45aa-bf48-cb29ae22e801",
+        "reviewed_by": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "review_date": "2024-12-13T02:41:47.138Z",
+        "comments": "The application kept crashing but the support team helped me."
+      },
+      {
+        "review_id": "d540af32-506d-4c63-9b9e-299fd928c321",
+        "application_id": "6fb2fc68-7a4e-4dd6-b70c-c288914d0b6c",
+        "reviewed_by": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "review_date": "2024-05-03T02:41:47.138Z",
+        "comments": "I had to provide additional info, but it was no big deal."
+      },
+      {
+        "review_id": "5bdf9e56-70d5-4557-8bc3-9a7bb9ee1731",
+        "application_id": "07244904-43aa-45aa-bf48-cb29ae22e801",
+        "reviewed_by": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "review_date": "2024-07-14T02:41:47.138Z",
+        "comments": "The rates are competitive compared to other lenders."
+      },
+      {
+        "review_id": "5d039145-d09b-440f-ad77-b911d265d59e",
+        "application_id": "57b173ce-bba3-4f1c-b0a6-7a6bf4e57a28",
+        "reviewed_by": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "review_date": "2024-07-09T02:41:47.138Z",
+        "comments": "I received a personal touch that I wasn’t expecting."
+      },
+      {
+        "review_id": "aa3de23a-746c-4198-ad39-cbbeeb4b067a",
+        "application_id": "83754f11-e0ac-46e9-a2f2-dbf059333249",
+        "reviewed_by": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "review_date": "2024-12-08T02:41:47.138Z",
+        "comments": "The loan terms were clear and easy to understand."
+      },
+      {
+        "review_id": "7364d222-518a-4ce2-9e6c-ae324c7a7f49",
+        "application_id": "d10e66c7-fbc1-4667-83a7-f1021dfe9147",
+        "reviewed_by": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "review_date": "2024-09-15T02:41:47.138Z",
+        "comments": "Overall, I had a positive experience from start to finish."
+      },
+      {
+        "review_id": "858b352f-e6c8-4bfe-9019-889ab5993317",
+        "application_id": "64b9e1a6-257f-4831-bb7c-fef12ad26fbf",
+        "reviewed_by": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "review_date": "2024-06-01T02:41:47.138Z",
+        "comments": "I recommend this service to friends and family."
+      },
+      {
+        "review_id": "bddaac53-ceb1-4d97-8cfc-bd18042f885e",
+        "application_id": "d9fb6bd8-b5fb-4fb8-ac24-780bd897152b",
+        "reviewed_by": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "review_date": "2024-12-12T02:41:47.138Z",
+        "comments": "It made financing my project so much easier."
+      },
+      {
+        "review_id": "a274ed51-e6fe-4ab3-ac2b-95ede202bfa4",
+        "application_id": "0f981193-e513-421d-aa51-fd3257d94526",
+        "reviewed_by": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "review_date": "2024-01-09T02:41:47.138Z",
+        "comments": "The staff were very patient with my questions."
+      },
+      {
+        "review_id": "f5570e6a-4dbb-481e-879e-e993f04487e8",
+        "application_id": "595d0a8d-4ad6-43e4-8252-3ff2ec814b7c",
+        "reviewed_by": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "review_date": "2024-12-15T02:41:47.138Z",
+        "comments": "I found the process to be quite stress-free."
+      },
+      {
+        "review_id": "def5e746-ca5c-4067-800b-19e0a0a1e158",
+        "application_id": "bf632068-be1c-4a67-aac4-fb23b1f6c96f",
+        "reviewed_by": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "review_date": "2024-03-16T02:41:47.138Z",
+        "comments": "Great experience, the application was straightforward and the response was quick!"
+      },
+      {
+        "review_id": "a03ae0e3-130b-4ff5-94a8-a5764d95b337",
+        "application_id": "bf632068-be1c-4a67-aac4-fb23b1f6c96f",
+        "reviewed_by": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "review_date": "2024-12-02T02:41:47.138Z",
+        "comments": "The loan terms were clearly explained, and the customer service was very helpful."
+      },
+      {
+        "review_id": "354b7a3f-4c7c-4d38-8c03-4c7d1d82c9c0",
+        "application_id": "8e5e8855-5baf-48f5-ad2b-c18c5f4e4791",
+        "reviewed_by": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "review_date": "2024-06-12T02:41:47.138Z",
+        "comments": "I found the process to be a bit slow, but overall I'm satisfied with the outcome."
+      },
+      {
+        "review_id": "c8ba2a1d-a55e-4c6f-9e15-ec3a8ce2e339",
+        "application_id": "cd2d9ca7-edeb-4bdf-8266-6974c4cc5fa6",
+        "reviewed_by": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "review_date": "2024-01-20T02:41:47.138Z",
+        "comments": "Excellent platform! I was able to compare multiple offers easily."
+      },
+      {
+        "review_id": "8cff8af6-cbf2-4302-916d-8e770612bccb",
+        "application_id": "533174d3-d639-487c-99f7-ee72561a9eca",
+        "reviewed_by": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "review_date": "2024-11-15T02:41:47.138Z",
+        "comments": "Had some issues with the document upload, but support was responsive and resolved it quickly."
+      },
+      {
+        "review_id": "cb1093d7-b1c4-49b6-91c0-81b3ea26ce82",
+        "application_id": "c3838762-9ebb-446b-9b70-e9ea412b88b7",
+        "reviewed_by": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "review_date": "2024-12-06T02:41:47.138Z",
+        "comments": "Loan rates were competitive, and I appreciate the transparency in fees."
+      },
+      {
+        "review_id": "9da87f6e-6efe-4334-a8d1-cada2a16f2b1",
+        "application_id": "c347aaf0-ba78-4af3-a622-e587a4a4981a",
+        "reviewed_by": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "review_date": "2024-12-12T02:41:47.138Z",
+        "comments": "I would recommend this service to my friends and family, very user-friendly!"
+      },
+      {
+        "review_id": "6917024a-587a-46ab-971b-c2b8e08f9e5f",
+        "application_id": "0b8d216a-b8d7-42af-8048-00964722dc2a",
+        "reviewed_by": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "review_date": "2024-12-09T02:41:47.138Z",
+        "comments": "The online system is efficient, but I think they could improve the user interface."
+      },
+      {
+        "review_id": "9027c482-df94-4d33-a253-71fe0a733672",
+        "application_id": "6fb2fc68-7a4e-4dd6-b70c-c288914d0b6c",
+        "reviewed_by": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "review_date": "2024-09-27T02:41:47.138Z",
+        "comments": "Overall a solid experience, I just wish there were more filtering options for loans."
+      }
+    ],
+    "Queries": [
+      {
+        "query_id": "e5ada4e3-f846-4e35-91ee-f61b01cfd55c",
+        "application_id": "57b173ce-bba3-4f1c-b0a6-7a6bf4e57a28",
+        "query_date": "2024-09-22T02:41:50.935Z",
+        "query_content": "What is the interest rate for personal loans?",
+        "response": "Your application has been received and is currently under review."
+      },
+      {
+        "query_id": "51a19e46-3b7d-4fd2-9c57-664269b690db",
+        "application_id": "0b8d216a-b8d7-42af-8048-00964722dc2a",
+        "query_date": "2024-10-08T02:41:50.935Z",
+        "query_content": "Can I apply for a loan with bad credit?",
+        "response": "We require additional information to process your application."
+      },
+      {
+        "query_id": "9c982a63-4705-4c34-8705-4776983c443f",
+        "application_id": "fe442be9-7a50-43a2-826f-211d786b8b2c",
+        "query_date": "2024-06-20T02:41:50.935Z",
+        "query_content": "What documents do I need to provide for the application?",
+        "response": "Thank you for your inquiry! We will get back to you shortly."
+      },
+      {
+        "query_id": "68b8ddaa-379f-4fd4-84e9-80ee14903112",
+        "application_id": "64b9e1a6-257f-4831-bb7c-fef12ad26fbf",
+        "query_date": "2024-12-12T02:41:50.935Z",
+        "query_content": "How long will it take to receive a decision on my loan application?",
+        "response": "Your application status has been updated to 'In Progress'."
+      },
+      {
+        "query_id": "3631f8a7-9b8f-491a-9ca4-685aba2242b4",
+        "application_id": "595d0a8d-4ad6-43e4-8252-3ff2ec814b7c",
+        "query_date": "2024-01-24T02:41:50.935Z",
+        "query_content": "Can I change the amount I am requesting after submitting the application?",
+        "response": "Please provide a copy of your income statement for verification."
+      },
+      {
+        "query_id": "34371a0e-ef93-414a-9f9e-7fc7dcfb2f85",
+        "application_id": "83754f11-e0ac-46e9-a2f2-dbf059333249",
+        "query_date": "2024-12-05T02:41:50.935Z",
+        "query_content": "Are there any fees associated with the loan?",
+        "response": "Your loan application has been approved!"
+      },
+      {
+        "query_id": "50fda20f-e08f-4b54-a318-1117f92c4b6b",
+        "application_id": "d10e66c7-fbc1-4667-83a7-f1021dfe9147",
+        "query_date": "2024-11-29T02:41:50.935Z",
+        "query_content": "What are the repayment terms for this loan?",
+        "response": "We need clarification on your employment details."
+      },
+      {
+        "query_id": "7f889903-c98d-4b87-a250-8acdc5c532a1",
+        "application_id": "e816ec34-f492-4677-9779-f842f38e48ca",
+        "query_date": "2024-12-11T02:41:50.935Z",
+        "query_content": "Is there a possibility to refinance my loan in the future?",
+        "response": "Your application was not approved due to insufficient credit history."
+      },
+      {
+        "query_id": "a7f097ac-5c8c-4a37-a2be-d5715555be96",
+        "application_id": "595d0a8d-4ad6-43e4-8252-3ff2ec814b7c",
+        "query_date": "2024-12-09T02:41:50.935Z",
+        "query_content": "How can I check the status of my loan application?",
+        "response": "Please upload your identification documents for verification."
+      },
+      {
+        "query_id": "44c04e91-eb7f-4c46-923a-785762b966fc",
+        "application_id": "0f981193-e513-421d-aa51-fd3257d94526",
+        "query_date": "2024-04-20T02:41:50.935Z",
+        "query_content": "What happens if I miss a loan payment?",
+        "response": "We are reviewing your application and will respond within 3 business days."
+      },
+      {
+        "query_id": "7bf085cf-a067-483a-9fc9-b00af99097fc",
+        "application_id": "d9fb6bd8-b5fb-4fb8-ac24-780bd897152b",
+        "query_date": "2024-12-13T02:41:50.935Z",
+        "query_content": "Are co-signers allowed on loan applications?",
+        "response": "Thank you for your patience as we process your request."
+      },
+      {
+        "query_id": "a8312d84-c426-4c70-8a86-eda3ceaecd73",
+        "application_id": "67358f1f-5ac3-4fcc-9f3e-8f92e715bac7",
+        "query_date": "2024-12-10T02:41:50.935Z",
+        "query_content": "What is the maximum loan amount available?",
+        "response": "Your application has been completed successfully."
+      },
+      {
+        "query_id": "17b1747c-8752-4a82-bebd-62fef8ec48c9",
+        "application_id": "bf632068-be1c-4a67-aac4-fb23b1f6c96f",
+        "query_date": "2024-12-09T02:41:50.935Z",
+        "query_content": "Can I pay off my loan early without penalties?",
+        "response": "We are still waiting on some documents from your side."
+      },
+      {
+        "query_id": "b4d2644e-7e16-4657-8e3d-135144c57878",
+        "application_id": "64b9e1a6-257f-4831-bb7c-fef12ad26fbf",
+        "query_date": "2024-09-01T02:41:50.935Z",
+        "query_content": "What are the eligibility requirements for your loans?",
+        "response": "Connectivity issues have caused a delay in processing your application."
+      },
+      {
+        "query_id": "b8e0cb34-57d4-40e5-859c-ba30afa6a117",
+        "application_id": "533174d3-d639-487c-99f7-ee72561a9eca",
+        "query_date": "2024-12-10T02:41:50.935Z",
+        "query_content": "How do you calculate my loan eligibility?",
+        "response": "We recommend you check your credit score before applying."
+      },
+      {
+        "query_id": "8b0df42e-c8d3-4e10-8131-d7455014ce5d",
+        "application_id": "83754f11-e0ac-46e9-a2f2-dbf059333249",
+        "query_date": "2024-10-24T02:41:50.935Z",
+        "query_content": "What credit score do you require for loan approval?",
+        "response": "Your loan has been disbursed. Thank you for choosing us!"
+      },
+      {
+        "query_id": "13ca60b3-9cf2-4d6e-b50c-36181b71004c",
+        "application_id": "57b173ce-bba3-4f1c-b0a6-7a6bf4e57a28",
+        "query_date": "2024-07-03T02:41:50.935Z",
+        "query_content": "Do you offer secured or unsecured loans?",
+        "response": "It appears that your application is missing some required fields."
+      },
+      {
+        "query_id": "0b17adc9-45bd-48aa-9a72-d18013fcb257",
+        "application_id": "0b8d216a-b8d7-42af-8048-00964722dc2a",
+        "query_date": "2024-03-05T02:41:50.935Z",
+        "query_content": "Can I apply for a loan as a self-employed individual?",
+        "response": "For a faster response, please provide your contact information."
+      },
+      {
+        "query_id": "8e5267e7-17f4-4293-8a1c-a378df9f22e1",
+        "application_id": "07244904-43aa-45aa-bf48-cb29ae22e801",
+        "query_date": "2024-12-10T02:41:50.935Z",
+        "query_content": "Are there any promotions or discounts currently available?",
+        "response": "Your application is currently on hold; please contact support."
+      },
+      {
+        "query_id": "75942a6a-99a3-496a-8f58-66447124c727",
+        "application_id": "6fb2fc68-7a4e-4dd6-b70c-c288914d0b6c",
+        "query_date": "2024-12-11T02:41:50.935Z",
+        "query_content": "How will my interest rate be determined if I am approved?",
+        "response": "We have sent a verification link to your email, please check."
+      },
+      {
+        "query_id": "461ce215-c249-4d1a-9273-326b5854ccec",
+        "application_id": "c347aaf0-ba78-4af3-a622-e587a4a4981a",
+        "query_date": "2024-12-05T02:41:50.935Z",
+        "query_content": "Can I submit my application online?",
+        "response": "Your request for a loan increase has been reviewed and is pending approval."
+      },
+      {
+        "query_id": "4dc40498-d449-4982-9f27-4ccc203df0d0",
+        "application_id": "c347aaf0-ba78-4af3-a622-e587a4a4981a",
+        "query_date": "2024-12-11T02:41:50.935Z",
+        "query_content": "What is the process to appeal a loan rejection?",
+        "response": "We see that you have multiple applications; please clarify your primary request."
+      },
+      {
+        "query_id": "68289de1-4b66-4be6-821e-9b6a18155f83",
+        "application_id": "d9fb6bd8-b5fb-4fb8-ac24-780bd897152b",
+        "query_date": "2024-09-24T02:41:50.935Z",
+        "query_content": "Is there support available for first-time borrowers?",
+        "response": "You have an upcoming appointment for further consultation regarding your loan."
+      },
+      {
+        "query_id": "68689a90-2f17-4f80-9855-90bdbe551ad8",
+        "application_id": "533174d3-d639-487c-99f7-ee72561a9eca",
+        "query_date": "2024-05-18T02:41:50.935Z",
+        "query_content": "Can loans be transferred to another person after approval?",
+        "response": "Your payment schedule has been adjusted as per your request."
+      },
+      {
+        "query_id": "88a25bc6-33d9-4e00-a377-c0fb7eafd439",
+        "application_id": "8e5e8855-5baf-48f5-ad2b-c18c5f4e4791",
+        "query_date": "2024-12-13T02:41:50.935Z",
+        "query_content": "What factors are considered in my loan application review?",
+        "response": "We're sorry but we cannot lend to you at this time due to policy restrictions."
+      },
+      {
+        "query_id": "3ada9a2d-ee1a-4afc-8199-776ead3e6530",
+        "application_id": "c3838762-9ebb-446b-9b70-e9ea412b88b7",
+        "query_date": "2024-12-10T02:41:50.935Z",
+        "query_content": "What are the steps to take after receiving a loan offer?",
+        "response": "We appreciate your feedback on our application process."
+      },
+      {
+        "query_id": "f335f4fb-39ca-44e5-ba01-338fef05927d",
+        "application_id": "e816ec34-f492-4677-9779-f842f38e48ca",
+        "query_date": "2024-11-20T02:41:50.935Z",
+        "query_content": "Can I ask questions about my application through your portal?",
+        "response": "Your loan amount has been adjusted based on your credit score."
+      },
+      {
+        "query_id": "3f66e096-329f-49dd-8b55-98a71c77b3e3",
+        "application_id": "8e5e8855-5baf-48f5-ad2b-c18c5f4e4791",
+        "query_date": "2024-12-09T02:41:50.935Z",
+        "query_content": "What happens to my personal information after I submit my application?",
+        "response": "The processing time for your application is currently 5-7 business days."
+      },
+      {
+        "query_id": "65f58c34-d84b-4c5d-864c-52428b02cb76",
+        "application_id": "cd2d9ca7-edeb-4bdf-8266-6974c4cc5fa6",
+        "query_date": "2024-01-10T02:41:50.935Z",
+        "query_content": "Are there any restrictions on how I can use the loan funds?",
+        "response": "Your recent inquiries have been noted; a representative will contact you soon."
+      },
+      {
+        "query_id": "858e0a65-1355-4de1-9b7c-3b271af0f03e",
+        "application_id": "6fb2fc68-7a4e-4dd6-b70c-c288914d0b6c",
+        "query_date": "2024-11-08T02:41:50.935Z",
+        "query_content": "How often do I need to make payments on my loan?",
+        "response": "We have received your documents; thank you for your prompt response."
+      },
+      {
+        "query_id": "b2bf339f-414b-4981-9fe0-e938ff840854",
+        "application_id": "bf632068-be1c-4a67-aac4-fb23b1f6c96f",
+        "query_date": "2024-12-02T02:41:50.935Z",
+        "query_content": "What options do I have if I can't repay my loan on time?",
+        "response": "Your account has been temporarily suspended due to suspicious activity."
+      },
+      {
+        "query_id": "504c617e-4af9-4c1e-8847-e138325bf9ed",
+        "application_id": "fe442be9-7a50-43a2-826f-211d786b8b2c",
+        "query_date": "2024-11-11T02:41:50.935Z",
+        "query_content": "Do you offer loans to customers in other countries?",
+        "response": "We encourage you to reapply after 6 months for a better chance of approval."
+      },
+      {
+        "query_id": "de8d01c7-d397-4919-813a-32e82a9f53e9",
+        "application_id": "4c387607-f38a-4bc2-ab6a-5f2ce72a4636",
+        "query_date": "2024-12-13T02:41:50.935Z",
+        "query_content": "What is your employment status and monthly income?",
+        "response": "Thank you for your application, we are currently reviewing it."
+      },
+      {
+        "query_id": "28da07b0-a136-4094-82ec-14ce44292078",
+        "application_id": "d10e66c7-fbc1-4667-83a7-f1021dfe9147",
+        "query_date": "2024-12-02T02:41:50.935Z",
+        "query_content": "Can you provide additional details about your existing debts?",
+        "response": "Could you please provide more details about your income?"
+      },
+      {
+        "query_id": "c24a2f5f-04a0-4358-a226-5ea7b59e35ec",
+        "application_id": "c3838762-9ebb-446b-9b70-e9ea412b88b7",
+        "query_date": "2024-09-15T02:41:50.935Z",
+        "query_content": "What is the purpose of the loan you are applying for?",
+        "response": "We need your previous credit history to proceed further."
+      },
+      {
+        "query_id": "32143611-bacd-4d02-af1c-528fb1694678",
+        "application_id": "07244904-43aa-45aa-bf48-cb29ae22e801",
+        "query_date": "2024-12-10T02:41:50.935Z",
+        "query_content": "Have you had any recent changes in your financial situation?",
+        "response": "Your loan application has been successfully submitted."
+      },
+      {
+        "query_id": "bb42161b-4620-4395-aba5-7de658738dba",
+        "application_id": "cd2d9ca7-edeb-4bdf-8266-6974c4cc5fa6",
+        "query_date": "2024-12-02T02:41:50.935Z",
+        "query_content": "Can you clarify your current credit score or history?",
+        "response": "Please confirm your identity by answering the security questions."
+      },
+      {
+        "query_id": "6f1faaea-b684-4c34-9cb5-9b1fd4d8f67d",
+        "application_id": "4c387607-f38a-4bc2-ab6a-5f2ce72a4636",
+        "query_date": "2024-12-12T02:41:50.935Z",
+        "query_content": "What amount are you looking to borrow and what repayment terms do you prefer?",
+        "response": "We require additional documentation to complete your application."
+      },
+      {
+        "query_id": "12b65c1c-9359-4868-8aaa-cc8c49393f1c",
+        "application_id": "0f981193-e513-421d-aa51-fd3257d94526",
+        "query_date": "2024-12-08T02:41:50.935Z",
+        "query_content": "Are you able to provide collateral for this loan?",
+        "response": "What is your preferred loan amount and term?"
+      },
+      {
+        "query_id": "70b26203-b070-48c8-9371-b919a9be836f",
+        "application_id": "67358f1f-5ac3-4fcc-9f3e-8f92e715bac7",
+        "query_date": "2024-12-09T02:41:50.935Z",
+        "query_content": "How soon are you looking to receive funding for your loan?",
+        "response": "You can track the status of your application in your account."
+      }
+    ],
+    "QueryResponses": [
+      {
+        "response_id": "03a604e1-9abf-4220-be8d-ddfdcbe5953c",
+        "query_id": "7f889903-c98d-4b87-a250-8acdc5c532a1",
+        "response_date": "2024-12-14T02:41:55.180Z",
+        "response_content": "Thank you for your application. We are currently reviewing your details."
+      },
+      {
+        "response_id": "aa0149fa-a9f2-4caa-91c4-02bbf09c4148",
+        "query_id": "12b65c1c-9359-4868-8aaa-cc8c49393f1c",
+        "response_date": "2024-12-08T02:41:55.180Z",
+        "response_content": "Could you please provide additional income verification documents?"
+      },
+      {
+        "response_id": "45dc53a0-1352-4c99-9315-59515729416f",
+        "query_id": "c24a2f5f-04a0-4358-a226-5ea7b59e35ec",
+        "response_date": "2024-11-15T02:41:55.180Z",
+        "response_content": "Your application status is now under review by our credit team."
+      },
+      {
+        "response_id": "c7221678-2b97-4877-8e02-04958fd6d4f7",
+        "query_id": "f335f4fb-39ca-44e5-ba01-338fef05927d",
+        "response_date": "2024-12-02T02:41:55.180Z",
+        "response_content": "We're missing some information from your application. Please check your email."
+      },
+      {
+        "response_id": "67cbe3fd-f170-4bd8-9094-a89e0ecd5924",
+        "query_id": "51a19e46-3b7d-4fd2-9c57-664269b690db",
+        "response_date": "2024-11-14T02:41:55.180Z",
+        "response_content": "You have been pre-approved for a loan amount of $5000."
+      },
+      {
+        "response_id": "2e41ff21-6051-46cf-9f89-c2bcd75183e5",
+        "query_id": "34371a0e-ef93-414a-9f9e-7fc7dcfb2f85",
+        "response_date": "2024-12-07T02:41:55.180Z",
+        "response_content": "Please confirm your employment status for us to proceed."
+      },
+      {
+        "response_id": "611230a6-9786-4209-bedd-882fa269e333",
+        "query_id": "13ca60b3-9cf2-4d6e-b50c-36181b71004c",
+        "response_date": "2024-04-10T02:41:55.180Z",
+        "response_content": "The interest rates on your loan options vary, would you like more information?"
+      },
+      {
+        "response_id": "cbe507d4-32ba-45f5-a9c7-203164ccb4f3",
+        "query_id": "b8e0cb34-57d4-40e5-859c-ba30afa6a117",
+        "response_date": "2024-04-25T02:41:55.180Z",
+        "response_content": "Could you clarify your current living situation before we process your application?"
+      },
+      {
+        "response_id": "d3ff9b19-3eb0-4d68-aa08-b29614c8a828",
+        "query_id": "68b8ddaa-379f-4fd4-84e9-80ee14903112",
+        "response_date": "2024-12-11T02:41:55.180Z",
+        "response_content": "Thank you for your patience, our team will respond shortly."
+      },
+      {
+        "response_id": "9bf14c06-4806-4ec6-901d-16f52e62b60a",
+        "query_id": "28da07b0-a136-4094-82ec-14ce44292078",
+        "response_date": "2024-12-15T02:41:55.180Z",
+        "response_content": "We have received your query and will get back to you within 24 hours."
+      },
+      {
+        "response_id": "358edb71-41b0-4898-af06-dfad0be288b1",
+        "query_id": "7bf085cf-a067-483a-9fc9-b00af99097fc",
+        "response_date": "2024-07-05T02:41:55.180Z",
+        "response_content": "Your application is complete! We'll notify you of any updates soon."
+      },
+      {
+        "response_id": "bfb3f19c-10a5-41d7-8edd-1e38a7d44a3d",
+        "query_id": "e5ada4e3-f846-4e35-91ee-f61b01cfd55c",
+        "response_date": "2024-12-14T02:41:55.180Z",
+        "response_content": "What is the best time to reach you for further information?"
+      },
+      {
+        "response_id": "0560d603-a4d7-42b4-9f4d-48c9bc0a665a",
+        "query_id": "b2bf339f-414b-4981-9fe0-e938ff840854",
+        "response_date": "2024-04-11T02:41:55.180Z",
+        "response_content": "We need to verify your identity before processing your request."
+      },
+      {
+        "response_id": "d407e1f5-a879-4763-9cfd-ff1843d8938c",
+        "query_id": "32143611-bacd-4d02-af1c-528fb1694678",
+        "response_date": "2024-11-16T02:41:55.180Z",
+        "response_content": "Can you provide a co-signer for better loan terms?"
+      },
+      {
+        "response_id": "c9b2318f-6217-4cf8-9a2a-cac8e327a05a",
+        "query_id": "b8e0cb34-57d4-40e5-859c-ba30afa6a117",
+        "response_date": "2024-12-09T02:41:55.180Z",
+        "response_content": "Your application has been successfully submitted. Expect feedback soon."
+      },
+      {
+        "response_id": "096a66c8-dd6a-4255-b075-5b35b11e2c06",
+        "query_id": "7f889903-c98d-4b87-a250-8acdc5c532a1",
+        "response_date": "2024-12-03T02:41:55.180Z",
+        "response_content": "Please review the terms and conditions in your application dashboard."
+      },
+      {
+        "response_id": "8b6a7c3c-eb03-43e9-9882-44e8c4d65f36",
+        "query_id": "f335f4fb-39ca-44e5-ba01-338fef05927d",
+        "response_date": "2024-06-19T02:41:55.180Z",
+        "response_content": "What is your preferred loan repayment period?"
+      },
+      {
+        "response_id": "b6e26759-f2fc-410a-9c17-0a1c2f55119d",
+        "query_id": "9c982a63-4705-4c34-8705-4776983c443f",
+        "response_date": "2024-12-09T02:41:55.180Z",
+        "response_content": "We are currently processing a high volume of applications, thank you for your understanding."
+      },
+      {
+        "response_id": "bb3b6690-a5c7-4fb2-aff3-3bb78fcadd13",
+        "query_id": "68689a90-2f17-4f80-9855-90bdbe551ad8",
+        "response_date": "2024-05-31T02:41:55.180Z",
+        "response_content": "Your application is currently on hold pending further documentation."
+      },
+      {
+        "response_id": "be9bb9ec-2d2d-4011-bb3d-359f17ee1ab4",
+        "query_id": "65f58c34-d84b-4c5d-864c-52428b02cb76",
+        "response_date": "2024-12-10T02:41:55.180Z",
+        "response_content": "Can you specify the purpose of the loan in your query?"
+      },
+      {
+        "response_id": "31fda4ad-56be-4daa-9711-60afbdb18042",
+        "query_id": "bb42161b-4620-4395-aba5-7de658738dba",
+        "response_date": "2024-10-02T02:41:55.180Z",
+        "response_content": "Thank you for the additional information, we will expedite your application."
+      },
+      {
+        "response_id": "79a92c65-5eda-40a9-9008-e1015e1e70c7",
+        "query_id": "a7f097ac-5c8c-4a37-a2be-d5715555be96",
+        "response_date": "2024-05-18T02:41:55.180Z",
+        "response_content": "We appreciate your interest in our loan products. Please review your application details."
+      },
+      {
+        "response_id": "ee90738b-4441-40a4-9d16-c81e5948f1a0",
+        "query_id": "88a25bc6-33d9-4e00-a377-c0fb7eafd439",
+        "response_date": "2024-08-29T02:41:55.180Z",
+        "response_content": "Your loan application is being assessed. We will keep you updated."
+      },
+      {
+        "response_id": "2e7ac6e2-c5dd-409f-990c-16f30fb1d496",
+        "query_id": "bb42161b-4620-4395-aba5-7de658738dba",
+        "response_date": "2024-02-02T02:41:55.180Z",
+        "response_content": "For faster processing, please upload recent bank statements."
+      },
+      {
+        "response_id": "579b5a5b-9f85-4338-9987-17579541ffb5",
+        "query_id": "de8d01c7-d397-4919-813a-32e82a9f53e9",
+        "response_date": "2024-12-06T02:41:55.180Z",
+        "response_content": "Would you like assistance in choosing the right loan option for you?"
+      },
+      {
+        "response_id": "a66ff2af-eb41-4100-be94-3dc8f4212eb6",
+        "query_id": "de8d01c7-d397-4919-813a-32e82a9f53e9",
+        "response_date": "2024-12-02T02:41:55.180Z",
+        "response_content": "Your credit report has been reviewed. The results will be communicated shortly."
+      },
+      {
+        "response_id": "3baf3c2f-4310-4d5e-9a5d-f6b6e10c743c",
+        "query_id": "70b26203-b070-48c8-9371-b919a9be836f",
+        "response_date": "2024-12-12T02:41:55.180Z",
+        "response_content": "Please provide your contact number so we can call you for clarification."
+      },
+      {
+        "response_id": "2c7157d7-4d21-4138-91e7-442a4e241f23",
+        "query_id": "50fda20f-e08f-4b54-a318-1117f92c4b6b",
+        "response_date": "2024-12-05T02:41:55.180Z",
+        "response_content": "You can track the status of your application via your online portal."
+      },
+      {
+        "response_id": "1f7d694d-6206-4af3-8ee0-a7441af2e4f3",
+        "query_id": "b4d2644e-7e16-4657-8e3d-135144c57878",
+        "response_date": "2024-02-22T02:41:55.180Z",
+        "response_content": "Thank you for your prompt response. We are moving forward with your application."
+      },
+      {
+        "response_id": "4d72a484-30a8-4b8b-8012-026d8cd40ba6",
+        "query_id": "b2bf339f-414b-4981-9fe0-e938ff840854",
+        "response_date": "2024-12-09T02:41:55.180Z",
+        "response_content": "We will require proof of address for your application to proceed."
+      },
+      {
+        "response_id": "63f65f37-ea0a-432c-93e1-b26a211d1eba",
+        "query_id": "a7f097ac-5c8c-4a37-a2be-d5715555be96",
+        "response_date": "2024-12-11T02:41:55.180Z",
+        "response_content": "For any other queries, please reach out to our customer service team."
+      },
+      {
+        "response_id": "bd95bb1e-d4b3-422c-8f28-4e2dc9fdc8a5",
+        "query_id": "65f58c34-d84b-4c5d-864c-52428b02cb76",
+        "response_date": "2024-12-09T02:41:55.180Z",
+        "response_content": "Thank you for your application. We are currently reviewing it and will provide updates soon."
+      },
+      {
+        "response_id": "4db4cf67-2f17-4b38-9f3a-445971d74c69",
+        "query_id": "3f66e096-329f-49dd-8b55-98a71c77b3e3",
+        "response_date": "2024-07-06T02:41:55.180Z",
+        "response_content": "Could you please provide your employment details for further assessment?"
+      },
+      {
+        "response_id": "5e4150b5-6c0a-4844-8b9a-e87859fc5199",
+        "query_id": "13ca60b3-9cf2-4d6e-b50c-36181b71004c",
+        "response_date": "2024-01-29T02:41:55.180Z",
+        "response_content": "We noticed some discrepancies in your application. Can you clarify?"
+      },
+      {
+        "response_id": "b6e1e0d1-be84-4a6e-90ab-7aa91b2ffb48",
+        "query_id": "75942a6a-99a3-496a-8f58-66447124c727",
+        "response_date": "2024-07-23T02:41:55.180Z",
+        "response_content": "Your application is under review. Expect a response within 3-5 business days."
+      },
+      {
+        "response_id": "d22b0c76-4de2-4b4f-a1c7-6b19cc23472d",
+        "query_id": "7bf085cf-a067-483a-9fc9-b00af99097fc",
+        "response_date": "2024-05-18T02:41:55.180Z",
+        "response_content": "To proceed with your request, we need your income verification documents."
+      },
+      {
+        "response_id": "5ff9da8b-6fa4-4ca4-a023-f25198292278",
+        "query_id": "88a25bc6-33d9-4e00-a377-c0fb7eafd439",
+        "response_date": "2024-12-04T02:41:55.180Z",
+        "response_content": "Can you confirm the duration of your current residency?"
+      },
+      {
+        "response_id": "66daddfa-3d61-45b4-99dc-bacbd9fe30b6",
+        "query_id": "68289de1-4b66-4be6-821e-9b6a18155f83",
+        "response_date": "2024-01-05T02:41:55.180Z",
+        "response_content": "We appreciate your interest. Please allow us time to evaluate your request."
+      },
+      {
+        "response_id": "0083ec24-bffa-4180-a4ae-f58d1ffeca4b",
+        "query_id": "68b8ddaa-379f-4fd4-84e9-80ee14903112",
+        "response_date": "2024-12-15T02:41:55.180Z",
+        "response_content": "Your credit history will be taken into account in the evaluation process."
+      },
+      {
+        "response_id": "4124a953-f700-4c02-82dc-8aa9452d09c7",
+        "query_id": "3631f8a7-9b8f-491a-9ca4-685aba2242b4",
+        "response_date": "2024-05-12T02:41:55.180Z",
+        "response_content": "For a smoother process, please check if all fields in your application are complete."
+      },
+      {
+        "response_id": "d163e49b-d015-4a81-95ea-f6a9bc61b30d",
+        "query_id": "9c982a63-4705-4c34-8705-4776983c443f",
+        "response_date": "2024-12-13T02:41:55.180Z",
+        "response_content": "Your application has been received. Next steps will be communicated shortly."
+      },
+      {
+        "response_id": "8ce1a773-10c0-4b26-b9b9-f03c30ef6a91",
+        "query_id": "44c04e91-eb7f-4c46-923a-785762b966fc",
+        "response_date": "2024-11-11T02:41:55.180Z",
+        "response_content": "Thank you for your patience while we review your documents."
+      },
+      {
+        "response_id": "b49249b1-286d-4201-810f-cdb670c96bc6",
+        "query_id": "3ada9a2d-ee1a-4afc-8199-776ead3e6530",
+        "response_date": "2024-12-04T02:41:55.180Z",
+        "response_content": "We need additional documentation to complete your evaluation process."
+      },
+      {
+        "response_id": "0d830334-b230-416a-92de-3e182f8d2946",
+        "query_id": "504c617e-4af9-4c1e-8847-e138325bf9ed",
+        "response_date": "2024-08-16T02:41:55.180Z",
+        "response_content": "Your application status is currently pending additional information."
+      },
+      {
+        "response_id": "91e4e062-acbc-4328-b560-62646878fb43",
+        "query_id": "68289de1-4b66-4be6-821e-9b6a18155f83",
+        "response_date": "2024-01-04T02:41:55.180Z",
+        "response_content": "Please provide your co-applicant's details if applicable."
+      },
+      {
+        "response_id": "ffe31b7f-0bbe-4fe9-b783-c06af6346b04",
+        "query_id": "8e5267e7-17f4-4293-8a1c-a378df9f22e1",
+        "response_date": "2024-03-16T02:41:55.180Z",
+        "response_content": "Your inquiry is important to us. We will respond as soon as possible."
+      },
+      {
+        "response_id": "4039436c-ea27-4c37-9cc3-34c306ff96e0",
+        "query_id": "4dc40498-d449-4982-9f27-4ccc203df0d0",
+        "response_date": "2024-12-08T02:41:55.180Z",
+        "response_content": "Thank you for reaching out. We are here to assist you with your application."
+      },
+      {
+        "response_id": "0a00935f-2558-4719-905a-3c6698b4c2ac",
+        "query_id": "75942a6a-99a3-496a-8f58-66447124c727",
+        "response_date": "2024-06-11T02:41:55.180Z",
+        "response_content": "Could you elaborate on your financial goals in the application?"
+      },
+      {
+        "response_id": "5c0f32fa-d54d-4ffa-b19c-a592d8479f17",
+        "query_id": "17b1747c-8752-4a82-bebd-62fef8ec48c9",
+        "response_date": "2024-03-09T02:41:55.180Z",
+        "response_content": "We received your request for information and are processing it now."
+      },
+      {
+        "response_id": "d3f001eb-33be-49c2-940e-d206d15b8ccd",
+        "query_id": "50fda20f-e08f-4b54-a318-1117f92c4b6b",
+        "response_date": "2024-03-18T02:41:55.180Z",
+        "response_content": "In order to expedite your application, please attach all required files."
+      },
+      {
+        "response_id": "8748939a-644b-4ade-a501-737dc7be543e",
+        "query_id": "e5ada4e3-f846-4e35-91ee-f61b01cfd55c",
+        "response_date": "2024-06-03T02:41:55.180Z",
+        "response_content": "We noticed missing documents; please check your application details."
+      },
+      {
+        "response_id": "4ee4b841-3739-4bb9-90cc-6f0f44442033",
+        "query_id": "0b17adc9-45bd-48aa-9a72-d18013fcb257",
+        "response_date": "2024-12-02T02:41:55.180Z",
+        "response_content": "Your application is still in review, and we appreciate your understanding."
+      },
+      {
+        "response_id": "222c2e82-37cc-41f4-b50e-c10dfc729648",
+        "query_id": "3631f8a7-9b8f-491a-9ca4-685aba2242b4",
+        "response_date": "2024-12-13T02:41:55.180Z",
+        "response_content": "Do you have any questions about the loan process we can help with?"
+      },
+      {
+        "response_id": "a8da2860-4821-465a-b829-2ec3778e40d6",
+        "query_id": "8b0df42e-c8d3-4e10-8131-d7455014ce5d",
+        "response_date": "2024-12-11T02:41:55.180Z",
+        "response_content": "To help us evaluate, please confirm any outstanding debts you may have."
+      },
+      {
+        "response_id": "0ee2d2e3-d3b8-4a16-8aca-37f469456e79",
+        "query_id": "c24a2f5f-04a0-4358-a226-5ea7b59e35ec",
+        "response_date": "2024-08-01T02:41:55.180Z",
+        "response_content": "Thank you for your submission. We will notify you about next steps shortly."
+      },
+      {
+        "response_id": "51ecff9c-18be-44d5-8779-a63d511b9b6d",
+        "query_id": "44c04e91-eb7f-4c46-923a-785762b966fc",
+        "response_date": "2024-03-04T02:41:55.180Z",
+        "response_content": "We are almost done reviewing your application; thank you for your patience!"
+      },
+      {
+        "response_id": "82d8a85f-ff56-495c-a51e-62537bc65c43",
+        "query_id": "b4d2644e-7e16-4657-8e3d-135144c57878",
+        "response_date": "2024-10-26T02:41:55.180Z",
+        "response_content": "Please update us on any changes to your financial situation since your application."
+      },
+      {
+        "response_id": "52a5d895-679a-4ca6-8794-d7afbeb3b67d",
+        "query_id": "34371a0e-ef93-414a-9f9e-7fc7dcfb2f85",
+        "response_date": "2024-04-29T02:41:55.180Z",
+        "response_content": "Your application is important to us. Expect an update by end of the week."
+      },
+      {
+        "response_id": "40c4f3f8-8dad-4e40-a941-5cac83df823e",
+        "query_id": "a8312d84-c426-4c70-8a86-eda3ceaecd73",
+        "response_date": "2024-10-05T02:41:55.180Z",
+        "response_content": "To ensure a smooth process, kindly review your contact information."
+      },
+      {
+        "response_id": "6d3ec76a-b119-43c5-b946-7a56004df6a5",
+        "query_id": "17b1747c-8752-4a82-bebd-62fef8ec48c9",
+        "response_date": "2024-06-08T02:41:55.180Z",
+        "response_content": "Thank you for providing the necessary documents. We will review them shortly."
+      },
+      {
+        "response_id": "6e31b6b0-414f-48f2-ba02-2b460d6db1f3",
+        "query_id": "a8312d84-c426-4c70-8a86-eda3ceaecd73",
+        "response_date": "2024-12-06T02:41:55.180Z",
+        "response_content": "Could you please specify the loan amount you wish to apply for?"
+      },
+      {
+        "response_id": "c213dc1a-4adc-4b96-8f7d-7ffa6da72356",
+        "query_id": "28da07b0-a136-4094-82ec-14ce44292078",
+        "response_date": "2024-09-06T02:41:55.180Z",
+        "response_content": "Your application is in the final stages of review; thank you for your patience."
+      },
+      {
+        "response_id": "c1fd28ce-c9e5-4a6d-95f2-1887fdb98d33",
+        "query_id": "461ce215-c249-4d1a-9273-326b5854ccec",
+        "response_date": "2024-10-07T02:41:55.180Z",
+        "response_content": "We value your input. Help us improve by providing feedback through our survey."
+      },
+      {
+        "response_id": "acba21d0-5906-46ff-8a6c-5cf5c0c6ac70",
+        "query_id": "461ce215-c249-4d1a-9273-326b5854ccec",
+        "response_date": "2024-01-01T02:41:55.180Z",
+        "response_content": "Thank you for your application! We are currently reviewing your documents and will get back to you shortly."
+      },
+      {
+        "response_id": "8f6ec2bc-ec60-4773-9580-324d572a2892",
+        "query_id": "3ada9a2d-ee1a-4afc-8199-776ead3e6530",
+        "response_date": "2024-12-14T02:41:55.180Z",
+        "response_content": "Can you please provide proof of income for the last three months? This will help us in processing your application faster."
+      },
+      {
+        "response_id": "7a0c2945-5acd-44f7-a8bd-b02197dd4129",
+        "query_id": "12b65c1c-9359-4868-8aaa-cc8c49393f1c",
+        "response_date": "2024-06-05T02:41:55.180Z",
+        "response_content": "Your application is almost complete! Just one more document is needed: a government-issued ID."
+      },
+      {
+        "response_id": "c51439d0-d1ca-461d-b613-4684c23dc611",
+        "query_id": "0b17adc9-45bd-48aa-9a72-d18013fcb257",
+        "response_date": "2024-02-07T02:41:55.180Z",
+        "response_content": "We appreciate your patience! Your application is in the final stages of approval, and we will update you soon."
+      },
+      {
+        "response_id": "f117b8ae-d7b2-4781-b9fb-c40914631211",
+        "query_id": "68689a90-2f17-4f80-9855-90bdbe551ad8",
+        "response_date": "2024-12-11T02:41:55.180Z",
+        "response_content": "Unfortunately, we were unable to approve your application at this time. Please check your email for more details."
+      },
+      {
+        "response_id": "ee238b8f-7905-4216-8108-0313772175e9",
+        "query_id": "32143611-bacd-4d02-af1c-528fb1694678",
+        "response_date": "2024-12-14T02:41:55.180Z",
+        "response_content": "Could you please clarify the purpose of the loan? This information will help us tailor our offerings better to your needs."
+      },
+      {
+        "response_id": "aaebcd6a-2572-4535-8d58-dad5b39534a2",
+        "query_id": "3f66e096-329f-49dd-8b55-98a71c77b3e3",
+        "response_date": "2024-07-19T02:41:55.180Z",
+        "response_content": "Your loan application has been received, and our team is currently working on it. We will contact you if we need more information."
+      },
+      {
+        "response_id": "c44cbd15-5075-4bf6-86f0-f2bae794767d",
+        "query_id": "858e0a65-1355-4de1-9b7c-3b271af0f03e",
+        "response_date": "2024-12-04T02:41:55.180Z",
+        "response_content": "We noticed that your credit score is below our minimum requirements. Would you like us to suggest other loan options?"
+      },
+      {
+        "response_id": "0bce4a19-99ca-40aa-992f-85888769645a",
+        "query_id": "4dc40498-d449-4982-9f27-4ccc203df0d0",
+        "response_date": "2024-12-11T02:41:55.180Z",
+        "response_content": "Thank you for your interest in our loan products! We have received your inquiry and will respond shortly."
+      },
+      {
+        "response_id": "f23588b2-7fbe-4e0a-8aa0-7f45e60a834b",
+        "query_id": "51a19e46-3b7d-4fd2-9c57-664269b690db",
+        "response_date": "2023-12-24T02:41:55.180Z",
+        "response_content": "Could you confirm your current employment status? This information is crucial for processing your loan application."
+      },
+      {
+        "response_id": "1cd5fdb1-7255-4514-90c0-738d1d68218d",
+        "query_id": "858e0a65-1355-4de1-9b7c-3b271af0f03e",
+        "response_date": "2024-12-08T02:41:55.180Z",
+        "response_content": "Your application is under review, and we appreciate your understanding during this process. We will notify you when a decision has been reached."
+      },
+      {
+        "response_id": "64736972-f211-4025-aa57-b1bf9894e7fc",
+        "query_id": "6f1faaea-b684-4c34-9cb5-9b1fd4d8f67d",
+        "response_date": "2024-05-01T02:41:55.180Z",
+        "response_content": "Please ensure that all your documents are legible to avoid delays in processing your loan application."
+      },
+      {
+        "response_id": "b442a638-6375-4205-b518-c30fb5238f33",
+        "query_id": "70b26203-b070-48c8-9371-b919a9be836f",
+        "response_date": "2024-12-08T02:41:55.180Z",
+        "response_content": "We are currently experiencing a high volume of applications. Please bear with us as we process your request."
+      },
+      {
+        "response_id": "77f5f939-b7b4-4869-8724-ed2b83b7c56f",
+        "query_id": "504c617e-4af9-4c1e-8847-e138325bf9ed",
+        "response_date": "2024-12-07T02:41:55.180Z",
+        "response_content": "Your response is important to us! Kindly reply to this message so we can proceed with the next steps."
+      },
+      {
+        "response_id": "f79b5664-79bb-4011-8863-296430bf7f3e",
+        "query_id": "8e5267e7-17f4-4293-8a1c-a378df9f22e1",
+        "response_date": "2024-12-07T02:41:55.180Z",
+        "response_content": "Your loan has been approved! Please check your email for the next steps to finalize the process."
+      },
+      {
+        "response_id": "430cd2f2-b972-419e-b4ef-08233fa40ae3",
+        "query_id": "8b0df42e-c8d3-4e10-8131-d7455014ce5d",
+        "response_date": "2024-02-15T02:41:55.180Z",
+        "response_content": "Thank you for submitting additional information. We will review it and get back to you within the next 48 hours."
+      },
+      {
+        "response_id": "a22e048b-6232-4181-bf4f-25ea5e513ad2",
+        "query_id": "6f1faaea-b684-4c34-9cb5-9b1fd4d8f67d",
+        "response_date": "2024-12-12T02:41:55.180Z",
+        "response_content": "We are happy to assist you with any further questions you may have regarding your application process."
+      }
+    ],
+    "ProviderQueries": [
+      {
+        "query_provider_id": "2791efed-7389-4906-8f86-22b090d95f13",
+        "provider_id": "76afb9ac-3a3f-4018-971f-2930003d0974",
+        "query_date": "2024-09-05T02:42:04.758Z",
+        "query_content": "What is the purpose of your loan application?"
+      },
+      {
+        "query_provider_id": "0d878b3d-fd60-431c-ac98-204f5af3d27c",
+        "provider_id": "93eb5933-44fc-4ea5-a6fc-43b39d382ce2",
+        "query_date": "2024-02-03T02:42:04.758Z",
+        "query_content": "Can you provide additional proof of income?"
+      },
+      {
+        "query_provider_id": "56696cf0-9237-43f7-9432-484354ea648f",
+        "provider_id": "d9d79337-0be5-4a58-9869-48b5bbdab396",
+        "query_date": "2024-12-09T02:42:04.758Z",
+        "query_content": "Please clarify your credit history details."
+      },
+      {
+        "query_provider_id": "c4b457fa-644a-4b97-9df0-4fc84fb48c0b",
+        "provider_id": "307601d4-d809-4bd2-a13d-d62e104f1f32",
+        "query_date": "2024-05-29T02:42:04.758Z",
+        "query_content": "What is the desired loan amount and term?"
+      },
+      {
+        "query_provider_id": "3e4b395f-eece-4a85-b726-4d93ac923516",
+        "provider_id": "d9d79337-0be5-4a58-9869-48b5bbdab396",
+        "query_date": "2024-12-11T02:42:04.758Z",
+        "query_content": "Have you ever declared bankruptcy?"
+      },
+      {
+        "query_provider_id": "6db9e412-a192-479c-b646-695f16c8dd63",
+        "provider_id": "307601d4-d809-4bd2-a13d-d62e104f1f32",
+        "query_date": "2024-09-22T02:42:04.758Z",
+        "query_content": "Can you explain any late payments on your credit report?"
+      },
+      {
+        "query_provider_id": "5fe92ef7-bd78-4679-b7d5-0ada80fe3e4b",
+        "provider_id": "93eb5933-44fc-4ea5-a6fc-43b39d382ce2",
+        "query_date": "2024-08-04T02:42:04.758Z",
+        "query_content": "What will the loan be used for specifically?"
+      },
+      {
+        "query_provider_id": "cd448218-1153-4453-a7b5-57e19b9f1fa5",
+        "provider_id": "76afb9ac-3a3f-4018-971f-2930003d0974",
+        "query_date": "2024-10-21T02:42:04.758Z",
+        "query_content": "Do you have any additional co-applicants?"
+      },
+      {
+        "query_provider_id": "72f846a9-7cbe-458d-adfa-67b35154a558",
+        "provider_id": "baf0e579-2de5-4ddf-8494-e6730e49587f",
+        "query_date": "2024-12-06T02:42:04.759Z",
+        "query_content": "Can you provide more information about your employment status?"
+      },
+      {
+        "query_provider_id": "ef7fc7e3-0a54-4449-a93e-73e2c81f2e34",
+        "provider_id": "baf0e579-2de5-4ddf-8494-e6730e49587f",
+        "query_date": "2024-12-03T02:42:04.759Z",
+        "query_content": "Have you considered how the loan repayments will fit into your budget?"
+      }
+    ],
+    "Notifications": [
+      {
+        "notification_id": "e3051b58-697d-4367-a26e-66a40462e555",
+        "user_id": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "notification_date": "2024-12-03T02:42:05.836Z",
+        "message": "Your loan application has been successfully submitted!",
+        "is_read": "true"
+      },
+      {
+        "notification_id": "aedc5290-0b0a-4e25-9cbb-86637c473575",
+        "user_id": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "notification_date": "2024-12-11T02:42:05.836Z",
+        "message": "We need more information to process your application, please check your inbox.",
+        "is_read": "true"
+      },
+      {
+        "notification_id": "eb6d2786-a4ac-4790-8b09-51184e65488b",
+        "user_id": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "notification_date": "2024-03-20T02:42:05.836Z",
+        "message": "Congratulations! Your loan has been approved.",
+        "is_read": "true"
+      },
+      {
+        "notification_id": "0d61c2b5-fc8b-462c-8a91-881846886120",
+        "user_id": "6f4aa503-157f-4262-94d8-b491abd6a375",
+        "notification_date": "2024-12-14T02:42:05.836Z",
+        "message": "Unfortunately, your loan application was declined. Please check your account for details.",
+        "is_read": "true"
+      },
+      {
+        "notification_id": "c6bda36b-81c5-4700-844b-2d0b59d00d47",
+        "user_id": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "notification_date": "2024-12-02T02:42:05.836Z",
+        "message": "Don’t forget to submit any required documents for your application.",
+        "is_read": "true"
+      },
+      {
+        "notification_id": "5265ef59-34a9-4750-9a24-773ccf71133f",
+        "user_id": "1afbce50-6ce8-41ef-97f2-ea2103e7dce0",
+        "notification_date": "2024-10-30T02:42:05.836Z",
+        "message": "Your loan status has been updated. Log in to view the details.",
+        "is_read": "true"
+      },
+      {
+        "notification_id": "11ff3444-ecf6-485c-bc4b-fa05129928e2",
+        "user_id": "8d591ffa-bafe-4f1e-b3d3-4ee20ad39208",
+        "notification_date": "2024-12-08T02:42:05.836Z",
+        "message": "A loan provider has reviewed your application. Please log in for more information.",
+        "is_read": "true"
+      },
+      {
+        "notification_id": "de28264f-1c83-4ff7-ad69-b20a0b85221b",
+        "user_id": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "notification_date": "2024-08-07T02:42:05.836Z",
+        "message": "Your application is currently under review. We'll notify you once there are updates.",
+        "is_read": "false"
+      },
+      {
+        "notification_id": "082f60e8-d839-4fd7-9f5d-6ed963a745ab",
+        "user_id": "d08013bd-b8d4-4f19-9ffb-5e5d756e3fce",
+        "notification_date": "2024-12-11T02:42:05.836Z",
+        "message": "Thank you for using our service! Your feedback is important to us.",
+        "is_read": "true"
+      },
+      {
+        "notification_id": "4722fd89-a882-48a2-9f35-e1bdf9faa222",
+        "user_id": "bd57d76e-7816-4b1b-bf27-9fd2bec5d25b",
+        "notification_date": "2024-08-08T02:42:05.836Z",
+        "message": "Reminder: Your next loan payment is due in 3 days.",
+        "is_read": "false"
+      }
+    ]
+  }
+}

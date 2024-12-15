@@ -2,7 +2,9 @@ import { z } from "zod";
 import generateResponse from "../util/generateResponse.js";
 import shuffleArray from "../util/shuffleArray.js";
 import transposeArray from "../util/transposeArray.js";
-import { Table } from "./generateDataModel.js";
+import { DataType, Table } from "./generateDataModel.js";
+import chalk from "chalk";
+import { v4 } from "uuid";
 
 export type RowsByTable = {
   [tableName: string]: {
@@ -39,7 +41,7 @@ async function generateDataForTable(
       [columnName: string]: string;
     }[];
   },
-  log: (message: string) => void = () => {},
+  log: (message: string) => void,
 ) {
   const ROW_COUNT_PER_REFERENCED_VALUE = 2;
 
@@ -133,27 +135,50 @@ async function generateDataForTable(
     table.columns.map(async (column) => {
       if (column.foreignKey) {
         return [...new Array(rowCount)].map(() => null);
-      } else {
-        const {
-          response: { values },
-        } = await generateResponse(
-          null,
-          [
-            {
-              role: "system",
-              content: `You are an assistant to generate column values for a database. You work for a company described as: ${businessSummary}`,
-            },
-            {
-              role: "user",
-              content: `Generate ${rowCount} values for column "${column.name}" with type ${column.type} in table "${table.name}".`,
-            },
-          ],
-          z.object({
-            values: z.array(z.string()),
-          }),
-          "row_data",
+      } else if (column.type === DataType.Boolean) {
+        return [...new Array(rowCount)].map(() =>
+          Math.random() < 0.5 ? "true" : "false",
         );
-        return values;
+      } else if (column.type === DataType.Date) {
+        return [...new Array(rowCount)].map(() => {
+          const isRecent = Math.random() < 0.5;
+          const msInADay = 24 * 60 * 60 * 1000;
+          if (isRecent) {
+            const daysAgo = Math.floor(Math.random() * 14);
+            return new Date(Date.now() - daysAgo * msInADay).toISOString();
+          } else {
+            const daysAgo = Math.floor(Math.random() * 365);
+            return new Date(Date.now() - daysAgo * msInADay).toISOString();
+          }
+        });
+      } else if (column.type === DataType.Float) {
+        return [...new Array(rowCount)].map(() =>
+          (Math.random() * 100).toFixed(2),
+        );
+      } else if (column.type === DataType.UUID) {
+        return [...new Array(rowCount)].map(() => v4());
+      } else {
+        let values: string[] = [];
+        while (values.length < rowCount) {
+          const { response } = await generateResponse(
+            [
+              {
+                role: "system",
+                content: `You are an assistant to generate column values for a database. You work for a company described as: ${businessSummary}`,
+              },
+              {
+                role: "user",
+                content: `Generate ${Math.min(rowCount - values.length, 30)} values for column "${column.name}" with type ${column.type} in table "${table.name}".`,
+              },
+            ],
+            z.object({
+              values: z.array(z.string()),
+            }),
+            "row_data",
+          );
+          values.push(...response.values);
+        }
+        return values.slice(0, rowCount);
       }
     }),
   );
@@ -163,10 +188,15 @@ async function generateDataForTable(
   _rowsByTable[table.name] = rowsWithForeignKeyColumnData.map(
     (rowWithForeignKeyData, i) => {
       return Object.fromEntries(
-        Object.entries(rowWithForeignKeyData).map(([columnName, value], j) => {
-          const ret = value ?? rowsWithNonForeignKeyData[i][j];
+        Object.entries(rowWithForeignKeyData).map(([columnName, value]) => {
+          const columnIndex = table.columns.findIndex(
+            (c) => c.name === columnName,
+          );
+          const ret = value ?? rowsWithNonForeignKeyData[i][columnIndex];
           if (!ret) {
-            throw new Error(`Missing value for row ${i}, column ${j}`);
+            throw new Error(
+              `Missing value for row ${i}, column ${table.name}.${columnName}. This should never happen. rowsWithNonForeignKeyData:\n ${JSON.stringify(rowsWithNonForeignKeyData)}`,
+            );
           }
           return [columnName, ret];
         }),
@@ -174,7 +204,9 @@ async function generateDataForTable(
     },
   );
   log(
-    `Generated ${_rowsByTable[table.name].length} rows for table ${table.name}`,
+    chalk.blue(
+      `Generated ${_rowsByTable[table.name].length} rows for table ${table.name}`,
+    ),
   );
 
   const visitedTables = Object.keys(_rowsByTable).length;
@@ -205,5 +237,6 @@ async function generateDataForTable(
     tables,
     firstTableWithAllReferencedTablesPopulated,
     _rowsByTable,
+    log,
   );
 }

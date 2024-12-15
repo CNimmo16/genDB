@@ -24,13 +24,15 @@
   "author": "CNimmo16",
   "license": "MIT",
   "bin": {
-    "generate": "dist/cli.js"
+    "generate": "dist/cli/generate.js",
+    "apply": "dist/cli/apply.js"
   },
   "scripts": {
     "format": "prettier --write .",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "generate": "dotenvx run -f .env.local -- node dist/cli/generate.js"
+    "generate": "dotenvx run -f .env.local -- node dist/cli/generate.js",
+    "apply": "dotenvx run -f .env.local -- node dist/cli/apply.js"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.29.0",
@@ -47,6 +49,7 @@
     "openai": "^4.76.2",
     "pg": "^8.13.1",
     "typescript": "^5.7.2",
+    "uuid": "^11.0.3",
     "yocto-spinner": "^0.1.2",
     "zod": "^3.24.1"
   }

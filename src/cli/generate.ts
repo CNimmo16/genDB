@@ -1,12 +1,27 @@
-import { confirm, input, number, password, select } from "@inquirer/prompts";
+import { confirm, input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import { z } from "zod";
 import actionWithLoading from "../util/actionWithLoading.js";
-import { generateDataModel } from "../service/generateDataModel.js";
+import { generateDataModel, Table } from "../service/generateDataModel.js";
 import { generateData } from "../service/generateData.js";
 import generateResponse from "../util/generateResponse.js";
 import { applyToDb } from "../service/applyToDb.js";
 import minimist from "minimist";
+import { join } from "path";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmdirSync,
+  rmSync,
+  writeFileSync,
+} from "fs";
+import { help } from "./shared/help.js";
+import getDbConfig from "./shared/getDbConfig.js";
+
+const backupFolder = `${process.cwd()}/.generative-db`;
+const modelBackupPrefix = "model-";
 
 async function runCli(maybeInputs: {
   businessSummary?: string;
@@ -15,9 +30,77 @@ async function runCli(maybeInputs: {
   console.log(chalk.blue("Welcome to Generative DB!"));
   console.log("");
 
-  console.log(chalk.green("Let's generate a database for your fake company"));
+  const backup = await (async () => {
+    if (!existsSync(backupFolder)) {
+      return null;
+    }
+    const backups = readdirSync(backupFolder)
+      .filter((f) => f.startsWith(modelBackupPrefix))
+      .map((fileName: string) => {
+        const datePortion = fileName.substring(
+          modelBackupPrefix.length,
+          modelBackupPrefix.length + 10,
+        );
+        const timePortion = fileName.split("_")[1].substring(0, 6);
+        const timeFormatted =
+          timePortion.substring(0, 2) +
+          ":" +
+          timePortion.substring(2, 4) +
+          ":" +
+          timePortion.substring(4, 6);
+        return {
+          contents: JSON.parse(
+            readFileSync(`${backupFolder}/${fileName}`).toString(),
+          ) as {
+            companyName: string;
+            businessSummary: string;
+            tables: Table[];
+          },
+          date: new Date(`${datePortion} ${timeFormatted}`),
+          path: `${backupFolder}/${fileName}`,
+        };
+      });
+    backups.sort((a, b) => b.date.getTime() - a.date.getTime());
 
-  let businessSummary = maybeInputs.businessSummary;
+    if (backups.length === 0) {
+      return null;
+    }
+    console.log(
+      `Found ${chalk.cyan(backups.length)} data model backup${backups.length === 1 ? "" : "s"} available to generate data from.`,
+    );
+    const summariseBackup = (b: (typeof backups)[number]) =>
+      `${b.date.toISOString().substring(0, 16).replace("T", " ")} - ${b.contents.companyName} (${b.contents.businessSummary.substring(0, 50)}...)`;
+    if (backups.length === 1) {
+      console.log(chalk.cyan(summariseBackup(backups[0])));
+    }
+    const wantsBackup = await confirm({
+      message: `Would you like to continue from ${backups.length > 1 ? "a" : "the"} backup?`,
+      default: false,
+    });
+    console.log(" ");
+    if (!wantsBackup) {
+      return null;
+    }
+    if (backups.length === 1) {
+      return backups[0];
+    }
+    return select({
+      message: "Which backup would you like to use?",
+      choices: backups.map((b) => ({
+        name: summariseBackup(b),
+        value: b,
+      })),
+    });
+  })();
+
+  if (backup) {
+    console.log(chalk.green(`Using selected backup.`));
+  } else {
+    console.log(chalk.green("Let's generate a database for your fake company"));
+  }
+
+  let businessSummary =
+    backup?.contents.businessSummary ?? maybeInputs.businessSummary;
 
   if (!businessSummary) {
     businessSummary = await input({
@@ -26,77 +109,91 @@ async function runCli(maybeInputs: {
     });
   }
 
-  let companyName = maybeInputs.companyName;
+  let companyName = backup?.contents.companyName ?? maybeInputs.companyName;
 
-  if (businessSummary) {
-    const {
-      response: { names: nameSuggestions },
-    } = await generateResponse(
-      "Generating name suggestions",
-      [
-        {
-          role: "user",
-          content: `Suggest 3 potential names for a startup company based on the following summary of its business: ${businessSummary}. Return only the names.`,
-        },
-      ],
-      z.object({
-        names: z.array(z.string()),
-      }),
-      "name",
-    );
+  if (!companyName) {
+    if (businessSummary) {
+      const {
+        response: { names: nameSuggestions },
+      } = await actionWithLoading("Generating name suggestions", () =>
+        generateResponse(
+          [
+            {
+              role: "user",
+              content: `Suggest 3 potential names for a startup company based on the following summary of its business: ${businessSummary}. Return only the names.`,
+            },
+          ],
+          z.object({
+            names: z.array(z.string()),
+          }),
+          "name",
+        ),
+      );
 
-    companyName = await select({
-      message: `What would you like to call your company?`,
-      choices: [
-        ...nameSuggestions.map((name) => ({
-          name: `"${name}"`,
-          value: name,
-        })),
-        {
-          name: "I want a custom name",
-          value: "other",
-        },
-      ],
-      loop: false,
-    });
-
-    if (companyName === "other") {
-      companyName = await input({
-        message: "What would you like to call your company?",
+      companyName = await select({
+        message: `What would you like to call your company?`,
+        choices: [
+          ...nameSuggestions.map((name) => ({
+            name: `"${name}"`,
+            value: name,
+          })),
+          {
+            name: "I want a custom name",
+            value: "other",
+          },
+        ],
+        loop: false,
       });
-    }
-  } else {
-    const { response } = await generateResponse(
-      "Generating company",
-      [
-        {
-          role: "user",
-          content: `Generate a business idea for a tech startup. Summarise the business business model in a few sentences. Also generate a suitable name for the company.`,
-        },
-      ],
-      z.object({
-        businessSummary: z.string(),
-        companyName: z.string(),
-      }),
-      "summary_with_name",
-    );
-    businessSummary = response.businessSummary;
-    companyName = response.companyName;
 
-    console.log(chalk.green("We've generated a company for you!"));
-    console.log("");
-    console.log(`${chalk.blue(`Company Name: `)}${chalk.white(companyName)}`);
-    console.log(
-      `${chalk.blue(`Business Summary: `)}${chalk.white(businessSummary)}`,
-    );
-    console.log("");
+      if (companyName === "other") {
+        companyName = await input({
+          message: "What would you like to call your company?",
+        });
+      }
+    } else {
+      const { response } = await actionWithLoading("Generating company", () =>
+        generateResponse(
+          [
+            {
+              role: "user",
+              content: `Generate a business idea for a tech startup. Summarise the business business model in a few sentences. Also generate a suitable name for the company.`,
+            },
+          ],
+          z.object({
+            businessSummary: z.string(),
+            companyName: z.string(),
+          }),
+          "summary_with_name",
+        ),
+      );
+      businessSummary = response.businessSummary;
+      companyName = response.companyName;
+
+      console.log(chalk.green("We've generated a company for you!"));
+      console.log("");
+      console.log(`${chalk.blue(`Company Name: `)}${chalk.white(companyName)}`);
+      console.log(
+        `${chalk.blue(`Business Summary: `)}${chalk.white(businessSummary)}`,
+      );
+      console.log("");
+    }
   }
 
-  const { tables } = await generateDataModel({ businessSummary, companyName });
+  const tables = backup
+    ? backup.contents.tables
+    : await actionWithLoading("Generating data model", () =>
+        generateDataModel({ businessSummary, companyName }),
+      ).then((res) => res.tables);
+  const modelGeneratedAt = new Date()
+    .toISOString()
+    .substring(0, 19)
+    .replace("T", "_")
+    .replaceAll(":", "");
 
   console.log(" ");
-  console.log(chalk.green("We've generated a data model for you!"));
-  console.log(`(Tokens used: ${JSON.stringify(tables).length})`);
+  if (!backup) {
+    console.log(chalk.green("We've generated a data model for you!"));
+  }
   console.log(" ");
   console.log(
     `${chalk.blue(`Tables with columns`)} (including ${chalk.green("primary keys")} and ${chalk.yellow("foreign keys")})`,
@@ -130,100 +227,105 @@ async function runCli(maybeInputs: {
     process.exit(0);
   }
 
-  const rowsByTable = await actionWithLoading("Generating data...", () =>
-    generateData(businessSummary, tables, console.log),
-  );
+  // TODO: proper typing
+  let rowsByTableToSave: any;
+  try {
+    const rowsByTable = await actionWithLoading("Generating data...", () =>
+      generateData(businessSummary, tables, console.log),
+    );
+    rowsByTableToSave = rowsByTable;
 
-  console.log(chalk.green(`Data generated successfully! Inserting data...`));
+    console.log(chalk.green(`Data generated successfully! Inserting data...`));
 
-  const dbType = await select({
-    message: "What database would you like to use?",
+    const dbConfig = await getDbConfig();
+
+    await applyToDb(dbConfig, tables, rowsByTable, console.log);
+  } catch (err) {
+    console.error(err);
+    if (!backup) {
+      if (!existsSync(backupFolder)) {
+        mkdirSync(backupFolder, { recursive: true });
+      }
+      const backupLoc = `${backupFolder}/${modelBackupPrefix}${modelGeneratedAt}.json`;
+      writeFileSync(
+        backupLoc,
+        JSON.stringify({
+          businessSummary,
+          companyName,
+          tables,
+        }),
+        {},
+      );
+    }
+    console.log(" ");
+    console.log(
+      chalk.red(
+        `Something went wrong while generating the data (see error above).`,
+      ),
+    );
+    console.log(" ");
+    if (backup) {
+      console.log(
+        `We have left the existing backup of your data model at ${chalk.yellow(backup.path)}.`,
+      );
+    } else {
+      console.log(
+        `We have saved a backup of your data model at ${chalk.yellow(`${process.cwd()}/.generative-db/cache/model-${modelGeneratedAt}.json`)}.`,
+      );
+    }
+    console.log(" ");
+    console.log(
+      `You can continue with this model by re-running the generate command now.`,
+    );
+    process.exit(0);
+  }
+
+  console.log(chalk.green("Data inserted successfully!"));
+
+  if (backup) {
+    rmSync(backup.path);
+    const backups = readdirSync(backupFolder);
+    if (backups.length === 0) {
+      rmdirSync(backupFolder);
+    }
+  }
+
+  const save = await select({
+    message:
+      "Would you like to also save your company name, business summary and data model as JSON to a file?",
     choices: [
       {
-        name: "Postgres",
-        value: "postgres",
+        name: "Yes",
+        value: true,
       },
       {
-        name: "MySQL",
-        value: "mysql",
+        name: "No",
+        value: false,
       },
     ],
   });
 
-  console.log(chalk.green("Enter your database details"));
-
-  const dbConfig = await (async () => {
-    switch (dbType) {
-      case "postgres": {
-        const host = await input({
-          message: "Host:",
-          default: "localhost",
-        });
-        const port = await number({
-          message: "Port:",
-          default: 5432,
-        });
-        const user = await input({
-          message: "User:",
-          default: "postgres",
-        });
-        const pass = await password({
-          message: "Password:",
-        });
-        const database = await input({
-          message: "Database:",
-          default: "postgres",
-        });
-        return {
-          client: "pg",
-          connection: {
-            host,
-            port,
-            user,
-            password: pass,
-            database,
-          },
-        };
-      }
-      case "mysql": {
-        const host = await input({
-          message: "Host:",
-          default: "localhost",
-        });
-        const port = await number({
-          message: "Port:",
-          default: 3306,
-        });
-        const user = await input({
-          message: "User:",
-          default: "root",
-        });
-        const pass = await password({
-          message: "Password:",
-        });
-        const database = await input({
-          message: "Database:",
-          default: "postgres",
-        });
-        return {
-          client: "mysql",
-          connection: {
-            host,
-            port,
-            user,
-            password: pass,
-            database,
-          },
-        };
-      }
-      default:
-        throw new Error("Unknown database type");
-    }
-  })();
-
-  await applyToDb(dbConfig, tables, rowsByTable, console.log);
-
-  console.log(chalk.green("Data inserted successfully!"));
+  if (save) {
+    const fileName = await input({
+      message: "Where would you like to save the file?",
+      default: "./generated-db.json",
+    });
+    const filePath = join(process.cwd(), fileName);
+    writeFileSync(
+      filePath,
+      JSON.stringify({
+        businessSummary,
+        companyName,
+        tables,
+        rowsByTable: rowsByTableToSave,
+      }),
+    );
+    console.log(
+      chalk.green(
+        `Data saved successfully to ${chalk.yellow(filePath)}. Run the apply command to apply the data to your database.`,
+      ),
+    );
+  }
 
   console.log(chalk.green("Goodbye!"));
 
@@ -233,34 +335,28 @@ async function runCli(maybeInputs: {
 const args = minimist(process.argv.slice(2));
 
 if (args.help) {
-  console.log(chalk.green("Welcome to Generative DB!"));
-  console.log(" ");
-  console.log(chalk.blue("Usage:"));
-  console.log(
-    `generate [--businessSummary <string>] [--companyName <string>] [--help]`,
-  );
-  console.log(" ");
-  process.exit(0);
+  help();
 }
 
-try {
-  const parsedArgs = z
-    .object({
-      businessSummary: z.string().optional(),
-      companyName: z.string().optional(),
-    })
-    .parse(args);
-
-  runCli(parsedArgs).catch((err) => {
-    if (err instanceof Error && err.name === "ExitPromptError") {
-      console.log(chalk.green("Oh, leaving so soon? Ok bye!"));
-      console.log(" ");
-      process.exit(0);
-    }
-  });
-} catch (err) {
+const { success, data: parsedArgs } = z
+  .object({
+    businessSummary: z.string().optional(),
+    companyName: z.string().optional(),
+  })
+  .safeParse(args);
+if (!success) {
   console.error(
     "generate called with invalid arguments. Run with --help for help.",
   );
   process.exit(0);
 }
+
+runCli(parsedArgs).catch((err) => {
+  if (err instanceof Error && err.name === "ExitPromptError") {
+    console.log(chalk.green("Oh, leaving so soon? Ok bye!"));
+    console.log(" ");
+    process.exit(0);
+  } else {
+    throw err;
+  }
+});
