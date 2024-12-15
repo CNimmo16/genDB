@@ -235,11 +235,30 @@ async function runCli(maybeInputs: {
     );
     rowsByTableToSave = rowsByTable;
 
-    console.log(chalk.green(`Data generated successfully! Inserting data...`));
+    console.log(chalk.green(`Data generated successfully!`));
+    console.log(" ");
 
-    const dbConfig = await getDbConfig();
+    const applyChanges = await select({
+      message: "Would you like to apply this data to a database now?",
+      choices: [
+        {
+          name: "Yes, apply changes now to a database of my choosing",
+          value: true,
+        },
+        {
+          name: "No, I'd like to get a JSON file of the generated data with the option to apply it to a database later",
+          value: false,
+        },
+      ],
+    });
 
-    await applyToDb(dbConfig, tables, rowsByTable, console.log);
+    if (applyChanges) {
+      const dbConfig = await getDbConfig();
+
+      await applyToDb(dbConfig, tables, rowsByTable, console.log);
+
+      console.log(chalk.green("Data inserted successfully!"));
+    }
   } catch (err) {
     console.error(err);
     if (!backup) {
@@ -280,8 +299,6 @@ async function runCli(maybeInputs: {
     process.exit(0);
   }
 
-  console.log(chalk.green("Data inserted successfully!"));
-
   if (backup) {
     rmSync(backup.path);
     const backups = readdirSync(backupFolder);
@@ -292,7 +309,7 @@ async function runCli(maybeInputs: {
 
   const save = await select({
     message:
-      "Would you like to also save your company name, business summary and data model as JSON to a file?",
+      "Would you like to save your company name, business summary and data model as JSON to a file?",
     choices: [
       {
         name: "Yes",
