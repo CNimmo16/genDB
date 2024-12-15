@@ -1,6 +1,6 @@
 {
   "name": "gendb",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Instantly generate and populate a real database for a fictional company",
   "keywords": [
