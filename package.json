@@ -34,7 +34,7 @@
     "generate": "dotenvx run -f .env.local -- node dist/cli/generate.js",
     "apply": "dotenvx run -f .env.local -- node dist/cli/apply.js",
     "changeset": "tsc && changeset",
-    "ci:release": "turbo run build lint test && changeset version && changeset publish"
+    "ci:release": "tsc && changeset version && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
