@@ -31,7 +31,7 @@
     "lint": "eslint --fix",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "gendb:dev": "dotenvx run -f .env.local -- node dist/bin.js",
+    "cli": "dotenvx run -f .env.local -- node dist/bin.js",
     "changeset": "tsc && changeset",
     "ci:release": "tsc && changeset version && changeset publish"
   },

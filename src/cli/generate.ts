@@ -335,98 +335,95 @@ export default async function generate(args: minimist.ParsedArgs) {
       }),
     );
 
-    const proceed = await confirm({
+    // TODO: add table editor via prompts (select from list of table names to edit or add new one, then select from list of column names to edit or add new one)
+
+    const shouldGenerateData = await confirm({
       message:
-        "Would you like to continue? We will now generate some data for your database.",
+        "Would you like to fill the database with AI-generated sample data?",
     });
 
-    if (!proceed) {
-      // TODO: add table editor via prompts (select from list of table names to edit or add new one, then select from list of column names to edit or add new one)
-
-      console.log(chalk.green("Goodbye!"));
-      process.exit(0);
-    }
-
-    let rowsByTableToSave: Awaited<
-      ReturnType<typeof generateData>
-    >["rowsByTable"];
     let save = false;
-    try {
-      const { rowsByTable, tokensUsed: tokensUsedToGenerateData } =
-        await actionWithLoading("Generating data...", () =>
-          generateData(businessSummary, tables, console.log),
+    let rowsByTableToSave:
+      | Awaited<ReturnType<typeof generateData>>["rowsByTable"]
+      | null = null;
+    if (shouldGenerateData) {
+      try {
+        const { rowsByTable, tokensUsed: tokensUsedToGenerateData } =
+          await actionWithLoading("Generating data...", () =>
+            generateData(businessSummary, tables, console.log),
+          );
+        totalTokensUsed = handleTokensUsed(
+          tokensUsedToGenerateData,
+          totalTokensUsed,
         );
-      totalTokensUsed = handleTokensUsed(
-        tokensUsedToGenerateData,
-        totalTokensUsed,
-      );
 
-      rowsByTableToSave = rowsByTable;
+        rowsByTableToSave = rowsByTable;
 
-      console.log(chalk.green(`Data generated successfully!`));
-      console.log(" ");
+        console.log(chalk.green(`Data generated successfully!`));
+        console.log(" ");
 
-      const applyChanges = await select({
-        message: "Would you like to apply this data to a database now?",
-        choices: [
-          {
-            name: "Yes, apply changes now to a database of my choosing",
-            value: true,
-          },
-          {
-            name: "No, I'd like to get a JSON file of the generated data with the option to apply it to a database later",
-            value: false,
-          },
-        ],
-      });
+        const applyChanges = await select({
+          message: "Would you like to apply this data to a database now?",
+          choices: [
+            {
+              name: "Yes, apply changes now to a database of my choosing",
+              value: true,
+            },
+            {
+              name: "No, I'd like to get a JSON file of the generated data with the option to apply it to a database later",
+              value: false,
+            },
+          ],
+        });
 
-      if (applyChanges) {
-        const dbConfig = await getDbConfig();
+        if (applyChanges) {
+          const dbConfig = await getDbConfig();
 
-        await applyToDb(dbConfig, tables, rowsByTable, console.log);
+          await applyToDb(dbConfig, tables, rowsByTable, console.log);
 
-        console.log(chalk.green("Data inserted successfully!"));
-      } else {
-        save = true;
-      }
-    } catch (err) {
-      console.error(err);
-      if (!backup) {
-        if (!existsSync(backupFolder)) {
-          mkdirSync(backupFolder, { recursive: true });
+          console.log(chalk.green("Data inserted successfully!"));
+        } else {
+          save = true;
         }
-        const backupLoc = `${backupFolder}/${modelBackupPrefix}${modelGeneratedAt}.json`;
-        writeFileSync(
-          backupLoc,
-          JSON.stringify({
-            businessSummary,
-            companyName,
-            tables,
-          }),
-          {},
-        );
-      }
-      console.log(" ");
-      console.log(
-        chalk.red(
-          `Something went wrong while generating the data (see error above).`,
-        ),
-      );
-      console.log(" ");
-      if (backup) {
+      } catch (err) {
+        console.error(err);
+        if (!backup) {
+          if (!existsSync(backupFolder)) {
+            mkdirSync(backupFolder, { recursive: true });
+          }
+          const backupLoc = `${backupFolder}/${modelBackupPrefix}${modelGeneratedAt}.json`;
+          writeFileSync(
+            backupLoc,
+            JSON.stringify({
+              businessSummary,
+              companyName,
+              tables,
+            }),
+            {},
+          );
+        }
+        console.log(" ");
         console.log(
-          `We have left the existing backup of your data model at ${chalk.yellow(backup.path)}.`,
+          chalk.red(
+            `Something went wrong while generating the data (see error above).`,
+          ),
         );
-      } else {
+        console.log(" ");
+        if (backup) {
+          console.log(
+            `We have left the existing backup of your data model at ${chalk.yellow(backup.path)}.`,
+          );
+        } else {
+          console.log(
+            `We have saved a backup of your data model at ${chalk.yellow(`${process.cwd()}/.generative-db/cache/model-${modelGeneratedAt}.json`)}.`,
+          );
+        }
+        console.log(" ");
         console.log(
-          `We have saved a backup of your data model at ${chalk.yellow(`${process.cwd()}/.generative-db/cache/model-${modelGeneratedAt}.json`)}.`,
+          `You can continue with this model by re-running the generate command now.`,
         );
+        process.exit(0);
       }
-      console.log(" ");
-      console.log(
-        `You can continue with this model by re-running the generate command now.`,
-      );
-      process.exit(0);
     }
 
     if (backup) {
