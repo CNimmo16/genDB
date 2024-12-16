@@ -30,7 +30,6 @@ export default async function generate(args: minimist.ParsedArgs) {
   const { success, data: maybeInputs } = z
     .object({
       businessSummary: z.string().optional(),
-      companyName: z.string().optional(),
       key: z.string().optional(),
     })
     .safeParse(args);
@@ -78,7 +77,6 @@ export default async function generate(args: minimist.ParsedArgs) {
             contents: JSON.parse(
               readFileSync(`${backupFolder}/${fileName}`).toString(),
             ) as {
-              companyName: string;
               businessSummary: string;
               tables: Table[];
             },
@@ -95,7 +93,7 @@ export default async function generate(args: minimist.ParsedArgs) {
         `Found ${chalk.cyan(backups.length)} data model backup${backups.length === 1 ? "" : "s"} available to generate data from.`,
       );
       const summariseBackup = (b: (typeof backups)[number]) =>
-        `${b.date.toISOString().substring(0, 16).replace("T", " ")} - ${b.contents.companyName} (${b.contents.businessSummary.substring(0, 50)}...)`;
+        `${b.date.toISOString().substring(0, 16).replace("T", " ")} (${b.contents.businessSummary.substring(0, 50)}...)`;
       if (backups.length === 1) {
         console.log(chalk.cyan(summariseBackup(backups[0])));
       }
@@ -137,88 +135,35 @@ export default async function generate(args: minimist.ParsedArgs) {
       });
     }
 
-    let companyName = backup?.contents.companyName ?? maybeInputs.companyName;
-
-    if (!companyName) {
-      if (businessSummary) {
-        const {
-          response: { names: nameSuggestions },
-          tokensUsed: tokensUsedForNameSuggestions,
-        } = await actionWithLoading("Generating name suggestions", () =>
+    if (!businessSummary) {
+      const { response, tokensUsed: tokensUsedForBusinessSummary } =
+        await actionWithLoading("Generating company", () =>
           generateResponse(
             [
               {
                 role: "user",
-                content: `Suggest 3 potential names for a startup company based on the following summary of its business: ${businessSummary}. Return only the names.`,
+                content: `Generate a business idea for a tech startup. Summarise the business business model in a few sentences.`,
               },
             ],
             z.object({
-              names: z.array(z.string()),
+              businessSummary: z.string(),
             }),
-            "name",
+            "business_summary",
           ),
         );
+      totalTokensUsed = handleTokensUsed(
+        tokensUsedForBusinessSummary,
+        totalTokensUsed,
+      );
 
-        totalTokensUsed = handleTokensUsed(
-          tokensUsedForNameSuggestions,
-          totalTokensUsed,
-        );
+      businessSummary = response.businessSummary;
 
-        companyName = await select({
-          message: `What would you like to call your company?`,
-          choices: [
-            ...nameSuggestions.map((name) => ({
-              name: `"${name}"`,
-              value: name,
-            })),
-            {
-              name: "I want a custom name",
-              value: "other",
-            },
-          ],
-          loop: false,
-        });
-
-        if (companyName === "other") {
-          companyName = await input({
-            message: "What would you like to call your company?",
-          });
-        }
-      } else {
-        const { response, tokensUsed: tokensUsedForCompanyName } =
-          await actionWithLoading("Generating company", () =>
-            generateResponse(
-              [
-                {
-                  role: "user",
-                  content: `Generate a business idea for a tech startup. Summarise the business business model in a few sentences. Also generate a suitable name for the company.`,
-                },
-              ],
-              z.object({
-                businessSummary: z.string(),
-                companyName: z.string(),
-              }),
-              "summary_with_name",
-            ),
-          );
-        totalTokensUsed = handleTokensUsed(
-          tokensUsedForCompanyName,
-          totalTokensUsed,
-        );
-
-        businessSummary = response.businessSummary;
-        companyName = response.companyName;
-
-        console.log(chalk.green("We've generated a company for you!"));
-        console.log("");
-        console.log(
-          `${chalk.blue(`Company Name: `)}${chalk.white(companyName)}`,
-        );
-        console.log(
-          `${chalk.blue(`Business Summary: `)}${chalk.white(businessSummary)}`,
-        );
-        console.log("");
-      }
+      console.log(chalk.green("We've generated a company for you!"));
+      console.log("");
+      console.log(
+        `${chalk.blue(`Business Summary: `)}${chalk.white(businessSummary)}`,
+      );
+      console.log("");
     }
 
     const { tables, modelGeneratedAt } = await (async function generateModel() {
@@ -246,7 +191,6 @@ export default async function generate(args: minimist.ParsedArgs) {
 
         const { estimatedTokens } = estimateRequiredTokensForDataModel({
           businessSummary,
-          companyName,
           tableCount: count,
         });
 
@@ -267,7 +211,6 @@ export default async function generate(args: minimist.ParsedArgs) {
         await actionWithLoading("Generating data model", () =>
           generateDataModel({
             businessSummary,
-            companyName,
             tableCount,
             tokenLimit,
           }),
@@ -396,7 +339,6 @@ export default async function generate(args: minimist.ParsedArgs) {
             backupLoc,
             JSON.stringify({
               businessSummary,
-              companyName,
               tables,
             }),
             {},
@@ -442,7 +384,7 @@ export default async function generate(args: minimist.ParsedArgs) {
     if (!save) {
       save = await select({
         message:
-          "Would you like to save your company name, business summary and data model as JSON to a file?",
+          "Would you like to save your business summary and data model as JSON to a file?",
         choices: [
           {
             name: "Yes",
@@ -466,7 +408,6 @@ export default async function generate(args: minimist.ParsedArgs) {
         filePath,
         JSON.stringify({
           businessSummary,
-          companyName,
           tables,
           rowsByTable: rowsByTableToSave,
         }),

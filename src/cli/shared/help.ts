@@ -5,7 +5,7 @@ export function help() {
   console.log(" ");
   console.log(chalk.blue("Usage:"));
   console.log(
-    `- gendb generate [--key <string>] [--businessSummary <string>] [--companyName <string>] [--help]`,
+    `- gendb generate [--key <string>] [--businessSummary <string>] [--help]`,
   );
   console.log(
     chalk.yellow(
