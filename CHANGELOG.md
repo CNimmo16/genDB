@@ -1,5 +1,11 @@
 # generative-db
 
+## 0.2.2
+
+### Patch Changes
+
+- c4e90f9: Remove company name field, make data generation optional
+
 ## 0.2.1
 
 ### Patch Changes
