@@ -24,7 +24,7 @@ export function estimateRequiredTokensForDataModel({
 }: Omit<GenerateDataModelInputs, "tokenLimit">) {
   const prompt = `imagine a data model for a company called ${companyName} with the following business model:\n${businessSummary}\nReturn a list of tables and columns for the company's database, including foreign keys. Generate a maximum of ${tableCount} tables. Do not generate foreign keys pointing to columns that do not exist.`;
 
-  const ESTIMATED_TOKENS_PER_TABLE = 300;
+  const ESTIMATED_TOKENS_PER_TABLE = 400;
 
   return {
     prompt,

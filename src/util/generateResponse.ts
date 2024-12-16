@@ -11,10 +11,12 @@ export default async function generateResponse<T extends ZodType>(
   dataDesc: string,
   options: Omit<
     Parameters<OpenAI["beta"]["chat"]["completions"]["parse"]>[0],
-    "messages"
-  > = {
-    model: "gpt-4o-mini",
-  },
+    "messages" | "model"
+  > & {
+    model?: Parameters<
+      OpenAI["beta"]["chat"]["completions"]["parse"]
+    >[0]["model"];
+  } = {},
 ): Promise<{
   response: z.infer<T>;
   tokensUsed: number;
@@ -37,6 +39,7 @@ export default async function generateResponse<T extends ZodType>(
       `${dataDesc}_response_format`,
     ),
     max_completion_tokens: DEFAULT_MAX_TOKENS,
+    model: options.model ?? "gpt-4o-mini",
     ...options,
   });
 
