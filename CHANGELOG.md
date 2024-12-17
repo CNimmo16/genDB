@@ -1,5 +1,11 @@
 # generative-db
 
+## 0.3.0
+
+### Minor Changes
+
+- 8836185: Use auto incrementing big integers for primary key columns (was usually generating UUID columns previously)
+
 ## 0.2.2
 
 ### Patch Changes
