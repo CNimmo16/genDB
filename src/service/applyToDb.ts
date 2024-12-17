@@ -33,7 +33,9 @@ export async function applyToDb(
       }
       await trx.schema.createTable(tableName, (t) => {
         for (const column of table.columns) {
-          const c = t[column.type](column.name);
+          const c = column.isAutoIncrementing
+            ? t.bigIncrements(column.name)
+            : t[column.type](column.name);
           if (column.isPrimaryKey) {
             c.primary();
           }

@@ -143,6 +143,8 @@ async function generateDataForTable(
     table.columns.map(async (column) => {
       if (column.foreignKey) {
         return [...new Array(rowCount)].map(() => null);
+      } else if (column.isAutoIncrementing) {
+        return [...new Array(rowCount)].map((_, i) => (i + 1).toString());
       } else if (column.type === DataType.Boolean) {
         return [...new Array(rowCount)].map(() =>
           Math.random() < 0.5 ? "true" : "false",

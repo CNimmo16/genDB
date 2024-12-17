@@ -20,7 +20,7 @@ export function estimateRequiredTokensForDataModel({
   businessSummary,
   tableCount,
 }: Omit<GenerateDataModelInputs, "tokenLimit">) {
-  const prompt = `imagine a data model for a company with the following business model:\n${businessSummary}\nReturn a list of tables and columns for the company's database, including foreign keys. Generate a maximum of ${tableCount} tables. Do not generate foreign keys pointing to columns that do not exist.`;
+  const prompt = `imagine a data model for a company with the following business model:\n${businessSummary}\nReturn a list of tables and columns for the company's database, including foreign keys. Generate a maximum of ${tableCount} tables. Do not generate foreign keys pointing to columns that do not exist. Use auto-incrementing integers as primary keys.`;
 
   const ESTIMATED_TOKENS_PER_TABLE = 400;
 
@@ -54,6 +54,7 @@ export async function generateDataModel({
           columns: z.array(
             z.object({
               name: z.string(),
+              isAutoIncrementing: z.boolean(),
               isPrimaryKey: z.boolean(),
               type: z.nativeEnum(DataType),
               foreignKey: z.object({
