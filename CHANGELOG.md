@@ -1,5 +1,11 @@
 # generative-db
 
+## 0.3.1
+
+### Patch Changes
+
+- 441642f: Allow "log" and "tokenLimit" fields to be left undefined
+
 ## 0.3.0
 
 ### Minor Changes
