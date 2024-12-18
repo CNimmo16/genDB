@@ -13,7 +13,7 @@ export enum DataType {
 type GenerateDataModelInputs = {
   businessSummary: string;
   tableCount: number;
-  tokenLimit: number;
+  tokenLimit?: number;
 };
 
 export function estimateRequiredTokensForDataModel({
@@ -35,11 +35,11 @@ export async function generateDataModel({
   tableCount,
   tokenLimit,
 }: GenerateDataModelInputs) {
-  const { prompt } = estimateRequiredTokensForDataModel({
+  const { prompt, estimatedTokens } = estimateRequiredTokensForDataModel({
     businessSummary,
     tableCount,
   });
-  const maxCompletionTokens = tokenLimit - prompt.length;
+  const maxCompletionTokens = (tokenLimit ?? estimatedTokens) - prompt.length;
   const { response: dataModel, tokensUsed } = await generateResponse(
     [
       {
