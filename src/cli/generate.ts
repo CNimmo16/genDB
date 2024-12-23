@@ -290,10 +290,28 @@ export default async function generate(args: minimist.ParsedArgs) {
       | Awaited<ReturnType<typeof generateData>>["rowsByTable"]
       | null = null;
     if (shouldGenerateData) {
+      const rowCountPerBaseTable = await number({
+        message:
+          "How many rows should be generated for each base table (tables which do not have foreign keys)?",
+        default: 5,
+      });
+
+      const rowCountPerReferencedValue = await number({
+        message:
+          "How many rows should be generated referencing each unique foreign key value? Eg. setting this to 2 would generate 2 books for each author in a database where books have an author_id column.",
+        default: 2,
+      });
+
       try {
         const { rowsByTable, tokensUsed: tokensUsedToGenerateData } =
           await actionWithLoading("Generating data...", () =>
-            generateData(businessSummary, tables, console.log),
+            generateData(
+              businessSummary,
+              tables,
+              console.log,
+              rowCountPerBaseTable,
+              rowCountPerReferencedValue,
+            ),
           );
         totalTokensUsed = handleTokensUsed(
           tokensUsedToGenerateData,

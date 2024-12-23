@@ -16,6 +16,8 @@ export async function generateData(
   businessSummary: string,
   tables: Table[],
   log: (message: string) => void = () => {},
+  rowCountPerBaseTable = 5,
+  rowCountPerReferencedValue = 2,
 ): Promise<{
   rowsByTable: RowsByTable;
   tokensUsed: number;
@@ -25,6 +27,8 @@ export async function generateData(
   );
 
   const { rowsByTable, totalTokensUsed } = await generateDataForTable(
+    rowCountPerBaseTable,
+    rowCountPerReferencedValue,
     businessSummary,
     tables,
     sourceTables[0],
@@ -40,6 +44,8 @@ export async function generateData(
 }
 
 async function generateDataForTable(
+  rowCountPerBaseTable: number,
+  rowCountPerReferencedValue: number,
   businessSummary: string,
   tables: Table[],
   table: Table,
@@ -51,8 +57,6 @@ async function generateDataForTable(
   log: (message: string) => void,
   totalTokensUsed: number,
 ) {
-  const ROW_COUNT_PER_REFERENCED_VALUE = 2;
-
   let rowsWithForeignKeyColumnData: { [columnName: string]: string | null }[] =
     [];
   if (table.columns.some((col) => col.foreignKey)) {
@@ -78,7 +82,7 @@ async function generateDataForTable(
           }
           const rowCountPerReference = foreignKeyColumn.isPrimaryKey
             ? 1
-            : ROW_COUNT_PER_REFERENCED_VALUE;
+            : rowCountPerReferencedValue;
           const allValuesFromReferencedTable =
             allRowsFromReferencedTable.flatMap((row) => {
               const value = row[actualColumnName];
@@ -128,13 +132,12 @@ async function generateDataForTable(
       rowsWithForeignKeyColumnData.push(row);
     }
   } else {
-    const ROW_COUNT_FOR_NON_REFERENCING_TABLE = 5;
-    rowsWithForeignKeyColumnData = [
-      ...new Array(ROW_COUNT_FOR_NON_REFERENCING_TABLE),
-    ].map(() => {
-      const rowEntries = table.columns.map((column) => [column.name, null]);
-      return Object.fromEntries(rowEntries);
-    });
+    rowsWithForeignKeyColumnData = [...new Array(rowCountPerBaseTable)].map(
+      () => {
+        const rowEntries = table.columns.map((column) => [column.name, null]);
+        return Object.fromEntries(rowEntries);
+      },
+    );
   }
 
   const rowCount = rowsWithForeignKeyColumnData.length;
@@ -247,6 +250,8 @@ async function generateDataForTable(
     );
   }
   return generateDataForTable(
+    rowCountPerBaseTable,
+    rowCountPerReferencedValue,
     businessSummary,
     tables,
     firstTableWithAllReferencedTablesPopulated,
