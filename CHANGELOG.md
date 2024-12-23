@@ -1,5 +1,11 @@
 # generative-db
 
+## 0.4.0
+
+### Minor Changes
+
+- f9d4a43: Make the number of rows generated per table and per foreign key configurable
+
 ## 0.3.1
 
 ### Patch Changes
